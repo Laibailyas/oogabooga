@@ -1,0 +1,33 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Ooga Booga Vintage Cartoon Theme",
+    "theme_author": "Senior Shopify Developer",
+    "theme_version": "1.0.0",
+    "theme_documentation_url": "https://oogabooga.com",
+    "theme_support_url": "https://oogabooga.com/support"
+  },
+  {
+    "name": "Colors & Aesthetics",
+    "settings": [
+      {
+        "type": "color",
+        "id": "color_primary_pink",
+        "label": "Primary Pink",
+        "default": "#f25287"
+      },
+      {
+        "type": "color",
+        "id": "color_teal",
+        "label": "Jungle Teal",
+        "default": "#00c9b7"
+      },
+      {
+        "type": "color",
+        "id": "color_yellow",
+        "label": "Cartoon Yellow",
+        "default": "#ffcb39"
+      }
+    ]
+  }
+]

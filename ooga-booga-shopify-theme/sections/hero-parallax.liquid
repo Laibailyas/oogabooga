@@ -1,0 +1,88 @@
+<section class="hero-parallax-section" id="story" aria-label="Ooga Booga Bedtime Adventure">
+  <!-- Celestial Twilight Sky -->
+  <div class="hero-sky-bg" id="heroSkyBg"></div>
+  <!-- Twinkling Starlight Field -->
+  <div class="stars-layer" id="heroStarsBg"></div>
+  <!-- Enchanted Woodland Forest Backdrop -->
+  <div class="hero-forest-bg" id="heroForestBg"></div>
+
+  <!-- Hero Content / Typography & CTAs -->
+  <div class="hero-content-container" id="heroContentBox">
+    <div class="vintage-comic-tag">★ An Unforgettable Bedtime Adventure ★</div>
+    <h1 class="hero-main-title">{{ section.settings.heading | default: 'OOGA BOOGA!' }}</h1>
+    <p class="hero-subheadline">
+      {{ section.settings.subheading | default: 'Last night an OOGA was spotted in Suburbia! He is wild! He is dangerous! And his favourite food is... SUBURBIANS!' }}
+    </p>
+
+    <div class="hero-cta-group">
+      <a href="#enchanted-forest" class="btn-cartoon btn-cartoon-yellow hero-btn">
+        📖 Explore The 3D Book
+      </a>
+      <a href="#cinema-hero" class="btn-cartoon btn-cartoon-pink hero-btn">
+        🎬 Watch Cartoon Film
+      </a>
+      <a href="#village-shopfront" class="btn-cartoon btn-cartoon-teal hero-btn">
+        🏬 Village Shops
+      </a>
+    </div>
+  </div>
+
+  <!-- Multi-Plane Interactive Parallax Characters Stage -->
+  <div class="hero-stage-container" id="heroStageBox">
+    <!-- Boy Character Running -->
+    <div class="hero-char-wrapper char-boy-wrapper" id="heroCharBoy">
+      <img 
+        src="{{ 'images/hero/char_boy.png' | asset_url }}" 
+        alt="Boy running in Ooga Booga adventure" 
+        class="hero-char char-boy" 
+        loading="eager"
+      >
+    </div>
+
+    <!-- Ooga Booga Monster Laughing & Sitting -->
+    <div class="hero-char-wrapper char-creature-wrapper" id="heroCharCreature">
+      <img 
+        src="{{ 'images/hero/char_creature.png' | asset_url }}" 
+        alt="Ooga Booga Monster leaping and laughing" 
+        class="hero-char char-creature" 
+        loading="eager"
+      >
+    </div>
+
+    <!-- Flying Apple Floating & Hovering -->
+    <div class="hero-char-wrapper item-apple-wrapper" id="heroItemApple">
+      <img 
+        src="{{ 'images/hero/item_apple.png' | asset_url }}" 
+        alt="Floating Apple" 
+        class="hero-char item-apple" 
+        loading="eager"
+      >
+    </div>
+  </div>
+
+  <!-- Scroll Indicator Cue -->
+  <div class="hero-scroll-cue" onclick="document.getElementById('cinema-hero').scrollIntoView({behavior: 'smooth'})" role="button" tabindex="0" aria-label="Scroll down to Outdoor Jungle Cinema">
+    <span>Scroll to Discover the Book</span>
+    <div class="scroll-bounce-arrow">↓</div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero Parallax World",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "OOGA BOOGA!"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Last night an OOGA was spotted in Suburbia! He is wild! He is dangerous! And his favourite food is... SUBURBIANS!"
+    }
+  ]
+}
+{% endschema %}

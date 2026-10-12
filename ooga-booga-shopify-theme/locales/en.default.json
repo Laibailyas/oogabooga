@@ -1,0 +1,19 @@
+{
+  "general": {
+    "cart": {
+      "title": "Your Cart",
+      "checkout": "Secure Checkout",
+      "subtotal": "Subtotal"
+    },
+    "accessibility": {
+      "close": "Close"
+    }
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Add to Cart",
+      "coming_soon": "Coming Soon",
+      "notify_me": "Notify Me"
+    }
+  }
+}

@@ -1,0 +1,144 @@
+<div class="product-page-main">
+  <div class="product-page-inner">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 24px;">
+      <a href="/" class="btn-product-back">
+        ← Back to Ooga Booga World
+      </a>
+    </div>
+
+    <!-- Product Hero Box (3D Rotating Model + Purchase Box) -->
+    <div class="product-hero-box">
+      <!-- 3D Interactive Stage -->
+      <div class="book-3d-stage-wrapper">
+        <div class="canvas-3d-container" id="book3dContainer" data-model-url="{{ 'models/Ooga_Booga_Hardcover_Render.glb' | asset_url }}" style="height: 480px;"></div>
+        
+        <div class="book-3d-controls">
+          <button type="button" class="btn-3d-ctrl" id="btn-view-cover">Front</button>
+          <button type="button" class="btn-3d-ctrl" id="btn-view-spine">Spine</button>
+          <button type="button" class="btn-3d-ctrl" id="btn-view-back">Back</button>
+          <button type="button" class="btn-3d-ctrl" id="btn-view-reset">Reset</button>
+        </div>
+      </div>
+
+      <!-- Product Buy Box -->
+      <div>
+        <div class="book-author-tag">Official Book Release • Gianni Dolce Vita</div>
+        <h1 class="book-title">Ooga Booga!</h1>
+        <div class="book-subtitle">Collector's First Edition</div>
+        
+        <div class="stars-rating">★★★★★ <span>(4.9 / 5 from 148 reviews)</span></div>
+
+        <p class="book-description">
+          Step into the wild vintage cartoon world! When an unruly monster escapes his wooden crate, Suburbia is thrown into joyful chaos. Featuring stunning hand-illustrated art, humorous storytelling, and a timeless 1950s animation feel.
+        </p>
+
+        <!-- Variants -->
+        <div class="variant-selector-group">
+          <label class="variant-label">Choose Edition:</label>
+          <div class="variant-options-grid">
+            <div class="variant-card selected" data-variant="hardcover">
+              <span class="variant-title">Hardcover Edition</span>
+              <span class="variant-price">$24.99</span>
+              <span class="variant-subtext">Gold Foil Embossed Stamped Cover</span>
+            </div>
+
+            <div class="variant-card" data-variant="softcover">
+              <span class="variant-title">Softcover Edition</span>
+              <span class="variant-price">$16.99</span>
+              <span class="variant-subtext">Flexible Lightweight Paperback</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add to cart -->
+        <div class="purchase-action-box">
+          <div class="quantity-stepper">
+            <button type="button" class="stepper-btn" id="qtyMinusBtn">-</button>
+            <input type="number" id="productQtyInput" class="stepper-value" value="1" min="1" max="10" readonly>
+            <button type="button" class="stepper-btn" id="qtyPlusBtn">+</button>
+          </div>
+
+          <button type="button" class="btn-cartoon btn-cartoon-pink" id="btnAddToCart" style="flex: 1;">
+            🛒 Add to Cart — <span id="bookPriceDisplay">$24.99</span>
+          </button>
+        </div>
+
+        <div class="features-list">
+          <div class="feature-bullet">📖 Format: 8.5" x 11" Hardcover</div>
+          <div class="feature-bullet">🎨 48 Full Color Archival Spreads</div>
+          <div class="feature-bullet">👶 Ages: 4 to 10+ (Family Favorite)</div>
+          <div class="feature-bullet">🚚 Free Tracked Shipping Over $40</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Images / Photo Grid Section (Client Requirement) -->
+    <div class="product-glass-card product-spread-section">
+      <h3 class="product-glass-title">
+        Book Artwork & Spread Previews
+      </h3>
+
+      <div class="spread-gallery-grid">
+        <div class="gallery-thumbnail-card">
+          <img src="{{ 'images/product/book_cover_spread.png' | asset_url }}" alt="Full Cover & Back Spread Artwork" loading="lazy">
+          <div class="gallery-card-label">Full Dustjacket & Spine Spread</div>
+        </div>
+
+        <div class="gallery-thumbnail-card">
+          <img src="{{ 'images/product/tree_scene.png' | asset_url }}" alt="Enchanted Forest Scene Spread" loading="lazy">
+          <div class="gallery-card-label">Forest River Scene Spread</div>
+        </div>
+
+        <div class="gallery-thumbnail-card">
+          <img src="{{ 'images/product/shops_scene.png' | asset_url }}" alt="Village Main Street Scene Spread" loading="lazy">
+          <div class="gallery-card-label">Suburbia Town Scene Spread</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Real Product Reviews Section Underneath (Client Requirement) -->
+    <div class="product-glass-card product-reviews-section">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 32px;">
+        <div>
+          <h3 class="product-glass-title" style="margin-bottom: 6px;">Customer Reviews</h3>
+          <div style="color: #ffb800; font-size: 1.25rem;">★★★★★ <span style="font-family: var(--font-fun); font-size: 0.95rem; color: rgba(255, 255, 255, 0.85); font-weight: 700;">Based on 148 verified reviews</span></div>
+        </div>
+        <button type="button" class="btn-product-back" style="color: #ffffff; cursor: pointer;">✍️ Write a Review</button>
+      </div>
+
+      <div class="reviews-grid">
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-quote">“Magnificent printing quality. The colors pop right off the page and the story has become an instant classic in our house.”</p>
+          <div class="reviewer-footer">
+            <div class="reviewer-avatar">JL</div>
+            <div class="reviewer-meta">
+              <span class="reviewer-name">Jessica L.</span>
+              <span class="reviewer-verified">✓ Verified Hardcover Purchaser</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-quote">“My students were captivated by the 3D world and the illustrations. A masterclass in vintage children's book design.”</p>
+          <div class="reviewer-footer">
+            <div class="reviewer-avatar">TR</div>
+            <div class="reviewer-meta">
+              <span class="reviewer-name">Thomas R.</span>
+              <span class="reviewer-verified">✓ Verified Teacher Purchaser</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Main Product Page",
+  "settings": []
+}
+{% endschema %}

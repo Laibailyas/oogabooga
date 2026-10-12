@@ -1,0 +1,78 @@
+<section class="psd-section psd-section-cinema" id="cinema-hero" aria-label="{{ section.settings.title | default: 'Suburban Jungle Cinema' }}">
+  <!-- Layer 1: Background sky -->
+  <div class="layer" id="l-bg">
+    <img src="{{ 'images/parallax/section 1/Ooga.Booga.Website.Homepag (4).png' | asset_url }}" alt="Cinema Sky Backdrop">
+  </div>
+
+  <!-- Ambient Glow -->
+  <div class="s1-ambient-glow"></div>
+
+  <!-- Top Announcement Badge -->
+  <div class="s1-overlay-header">
+    <span class="s1-vintage-pill">★ NOW SHOWING IN TECHNICOLOR ★</span>
+  </div>
+
+  <!-- Layer 2: Wooden frame with embedded video -->
+  <div class="layer" id="l-frame">
+    <div class="s1-video-stage">
+      <video 
+        id="cinemaVideo" 
+        class="s1-video-player"
+        src="{{ 'videos/LANDSCAPE.mp4' | asset_url }}"
+        data-portrait-src="{{ 'videos/PORTRAIT.mp4' | asset_url }}"
+        loop 
+        playsinline 
+        muted 
+        autoplay
+        preload="metadata"
+      >
+        Your browser does not support HTML5 video.
+      </video>
+    </div>
+    <img src="{{ 'images/parallax/section 1/Ooga.Booga.Website.Homepag.png' | asset_url }}" alt="Wooden Screen Frame" class="s1-frame-img">
+
+    <!-- Interactive Cinema Controls on Bottom Beam of Screen Frame -->
+    <div class="s1-controls-bar">
+      <button type="button" class="s1-control-btn s1-btn-play" id="btnPlayVideo">
+        ⏸ PAUSE
+      </button>
+      <button type="button" class="s1-control-btn s1-btn-mute" id="btnMuteVideo">
+        🔇 UNMUTE
+      </button>
+    </div>
+  </div>
+
+  <!-- Layer 3: Palm trees -->
+  <div class="layer" id="l-palms">
+    <img src="{{ 'images/parallax/section 1/Ooga.Booga.Website.Homepag (1).png' | asset_url }}" alt="Palm Trees">
+  </div>
+
+  <!-- Layer 4: Stones / Audience beanbags -->
+  <div class="layer" id="l-stones">
+    <img src="{{ 'images/parallax/section 1/Ooga.Booga.Website.Homepag (3).png' | asset_url }}" alt="Audience Seats">
+  </div>
+
+  <!-- Layer 5: Projector + Stage -->
+  <div class="layer" id="l-projector">
+    <img src="{{ 'images/parallax/section 1/Ooga.Booga.Website.Homepag (2).png' | asset_url }}" alt="Film Projector Platform">
+  </div>
+
+  <!-- Layer 6: Pineapple Character (Fully visible with no overlay) -->
+  <div class="layer" id="l-character">
+    <img src="{{ 'images/parallax/section 1/Ooga.Booga.Website.Homepag (5).png' | asset_url }}" alt="Pineapple Projectionist">
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Cartoon Cinema",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Suburban Jungle Cinema"
+    }
+  ]
+}
+{% endschema %}

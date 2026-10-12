@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ooga Monster Plushie — Coming Soon | Ooga Booga!</title>
+  <meta name="description" content="The official Ooga Monster collectible plushie — Coming Soon. Ultra-soft, hypoallergenic, and bursting with cartoon charm.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@400;600;700&family=Luckiest+Guy&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Shrikhand&display=swap" rel="stylesheet">
+
+  <!-- Theme CSS -->
+  <link rel="stylesheet" href="assets/theme.css">
+
+  <style>
+    /* ── Override: both columns start at top, not center-aligned ── */
+    .product-hero-box {
+      align-items: flex-start !important;
+    }
+    .book-3d-stage-wrapper {
+      align-self: flex-start;
+    }
+    .product-hero-box > div:last-child {
+      align-self: flex-start;
+    }
+    /* ── Plushie Coming-Soon Badge on product hero ── */
+    .plushie-cs-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--color-yellow-accent);
+      color: var(--color-purple-deep);
+      font-family: var(--font-heading);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      padding: 6px 18px;
+      border-radius: var(--border-radius-pill);
+      border: 2px solid var(--color-border-cartoon);
+      box-shadow: var(--shadow-cartoon-sm);
+      margin-bottom: 10px;
+    }
+
+    /* ── Plushie image display (replaces 3D stage) ── */
+    .plushie-image-stage {
+      background: #ffffff;
+      border: 3px solid var(--color-border-cartoon);
+      border-radius: var(--border-radius-lg);
+      display: flex;
+      align-items: flex-start;   /* image anchors to top */
+      justify-content: center;
+      min-height: 420px;
+      padding: 16px 24px 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-cartoon-md);
+    }
+
+    .plushie-image-stage::before {
+      display: none;
+    }
+
+    .plushie-main-img {
+      max-width: 420px;
+      width: 95%;
+      object-fit: contain;
+      /* PNG has white bg — blend it away */
+      mix-blend-mode: multiply;
+      filter: drop-shadow(0 16px 40px rgba(0, 201, 183, 0.40));
+      transition: transform 0.4s ease, filter 0.4s ease;
+    }
+
+    .plushie-main-img:hover {
+      transform: translateY(-10px) scale(1.04);
+      filter: drop-shadow(0 24px 56px rgba(0, 201, 183, 0.65));
+    }
+
+    .plushie-spin-hint {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-fun);
+      font-size: 0.78rem;
+      color: rgba(255, 255, 255, 0.45);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* ── Sold-out / waitlist replacement for add-to-cart ── */
+    .plushie-waitlist-box {
+      background: rgba(255, 255, 255, 0.07);
+      border: 2px solid rgba(255, 255, 255, 0.14);
+      border-radius: var(--border-radius-md);
+      padding: 20px 22px;
+      margin-top: 4px;
+    }
+
+    .plushie-waitlist-box p {
+      font-family: var(--font-fun);
+      font-size: 0.92rem;
+      color: rgba(255, 255, 255, 0.72);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .plushie-wl-form {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .plushie-wl-input {
+      flex: 1;
+      min-width: 180px;
+      padding: 12px 18px;
+      border-radius: var(--border-radius-pill);
+      border: 2px solid rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.09);
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .plushie-wl-input::placeholder { color: rgba(255, 255, 255, 0.42); }
+    .plushie-wl-input:focus { border-color: var(--color-teal-primary); }
+
+    .plushie-wl-note {
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      color: rgba(255, 255, 255, 0.42);
+      margin-top: 8px;
+    }
+
+    /* ── Coming Soon overlay on the price ── */
+    .plushie-price-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin: 8px 0 16px;
+    }
+
+    .plushie-price {
+      font-family: var(--font-fun);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--color-yellow-accent);
+    }
+
+    .plushie-price-tba {
+      font-family: var(--font-fun);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: var(--border-radius-pill);
+      padding: 3px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    /* ── Spec cards ── */
+    .plushie-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .plushie-spec-card {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--border-radius-sm);
+      padding: 12px 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .plushie-spec-icon {
+      font-size: 1.3rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .plushie-spec-label {
+      font-family: var(--font-fun);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .plushie-spec-value {
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.88);
+      line-height: 1.3;
+    }
+
+    @media (max-width: 640px) {
+      .plushie-specs-grid { grid-template-columns: 1fr; }
+      .plushie-wl-form { flex-direction: column; }
+    }
+  </style>
+</head>
+
+<body class="template-page">
+  <div class="vintage-grain-overlay"></div>
+
+  <!-- SITE HEADER -->
+  <header class="site-header" id="SiteHeader">
+    <div class="header-container">
+      <a href="index.html" class="logo-wrapper">
+        <span class="brand-logo-text"><span class="brand-word-ooga">OOGA</span> <span class="brand-word-booga">BOOGA!</span></span>
+      </a>
+      <nav class="main-nav-wrapper">
+        <ul class="main-nav">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="index.html#reviews" class="nav-link">Reviews</a></li>
+          <li><a href="product.html" class="nav-link nav-link-product">Book</a></li>
+          <li><a href="tshirt.html" class="nav-link">T-Shirts</a></li>
+          <li><a href="plushie.html" class="nav-link active">Plushie</a></li>
+        </ul>
+      </nav>
+      <div class="header-actions">
+        <a href="product.html" class="btn-cartoon btn-header-order">Order Book</a>
+        <button type="button" class="btn-cartoon btn-header-cart" id="openCartBtn">
+          🛒 Cart <span class="cart-btn-badge" id="cartCountBadge">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+    <div class="product-page-main">
+      <div class="product-page-inner">
+
+        <!-- Breadcrumb -->
+        <div style="margin-bottom: 24px;">
+          <a href="index.html" class="btn-product-back">← Back to Ooga Booga World</a>
+        </div>
+
+        <!-- Product Hero Box -->
+        <div class="product-hero-box">
+
+          <!-- Plushie Image Stage (replaces 3D model) -->
+          <div class="book-3d-stage-wrapper">
+            <div class="plushie-image-stage">
+              <img
+                src="assets/images/shop/plushie.png"
+                alt="Official Ooga Monster Collectible Plushie Toy"
+                class="plushie-main-img"
+                id="plushieHeroImg"
+              >
+              <span class="plushie-spin-hint">✨ Ultra-soft hypoallergenic plush</span>
+            </div>
+
+            <!-- Thumbnail colour previews (placeholders until final images exist) -->
+            <div class="book-3d-controls" style="margin-top: 16px;">
+              <button type="button" class="btn-3d-ctrl" id="viewEmerald" onclick="selectColour('emerald')">Emerald</button>
+              <button type="button" class="btn-3d-ctrl" id="viewCoral" onclick="selectColour('coral')">Coral</button>
+              <button type="button" class="btn-3d-ctrl" id="viewMidnight" onclick="selectColour('midnight')">Midnight</button>
+            </div>
+            <p style="text-align:center; font-family:var(--font-fun); font-size:0.78rem; color:rgba(255,255,255,0.4); margin-top:6px;">
+              Colour variants subject to final production — hover to preview
+            </p>
+          </div>
+
+          <!-- Buy / Waitlist Box -->
+          <div>
+            <div class="book-author-tag">Official Collectible Toy • Limited Production Run</div>
+            <h1 class="book-title">Ooga Monster<br>Plushie</h1>
+            <div class="book-subtitle">Collector's First Edition</div>
+
+            <div class="stars-rating">★★★★★ <span>(Early preview — not yet released)</span></div>
+
+            <div class="plushie-price-row">
+              <span class="plushie-price">~$34.99</span>
+              <span class="plushie-price-tba">Est. price — TBA at launch</span>
+            </div>
+
+            <p class="book-description">
+              Featuring ultra-soft hypoallergenic emerald plush fur, striped cartoon arms, the Monster's signature fang grin, and floppy velvet ears. Crafted with love for serious hugging adventures. Each plushie is individually hand-inspected before shipping.
+            </p>
+
+            <!-- Colour variants (decorative — not orderable yet) -->
+            <div class="variant-selector-group">
+              <label class="variant-label">Choose Colour:</label>
+              <div class="variant-options-grid">
+                <div class="variant-card selected" data-colour="emerald" onclick="selectColour('emerald')">
+                  <span class="variant-title">Emerald Classic</span>
+                  <span class="variant-subtext">Original Monster green</span>
+                </div>
+                <div class="variant-card" data-colour="coral" onclick="selectColour('coral')">
+                  <span class="variant-title">Coral Edition</span>
+                  <span class="variant-subtext">Limited colourway</span>
+                </div>
+                <div class="variant-card" data-colour="midnight" onclick="selectColour('midnight')">
+                  <span class="variant-title">Midnight Edition</span>
+                  <span class="variant-subtext">Glow-in-the-dark details</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Spec Grid -->
+            <div class="plushie-specs-grid">
+              <div class="plushie-spec-card">
+                <span class="plushie-spec-icon">📏</span>
+                <div>
+                  <div class="plushie-spec-label">Size</div>
+                  <div class="plushie-spec-value">30 cm / ~12 inches tall</div>
+                </div>
+              </div>
+              <div class="plushie-spec-card">
+                <span class="plushie-spec-icon">🧸</span>
+                <div>
+                  <div class="plushie-spec-label">Material</div>
+                  <div class="plushie-spec-value">Hypoallergenic plush fill</div>
+                </div>
+              </div>
+              <div class="plushie-spec-card">
+                <span class="plushie-spec-icon">🧺</span>
+                <div>
+                  <div class="plushie-spec-label">Care</div>
+                  <div class="plushie-spec-value">Surface wash only</div>
+                </div>
+              </div>
+              <div class="plushie-spec-card">
+                <span class="plushie-spec-icon">👶</span>
+                <div>
+                  <div class="plushie-spec-label">Age Rating</div>
+                  <div class="plushie-spec-value">Ages 3+ (CE certified)</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- WAITLIST (replaces Add to Cart) -->
+            <div class="plushie-cs-badge">🧸 PRE-ORDER — JOIN THE WAITLIST</div>
+
+            <div class="plushie-waitlist-box">
+              <p>
+                The Ooga Monster Plushie is currently in final production sampling. Reserve your spot below and you'll receive an exclusive early-purchase link 24 hours before the public drop.
+              </p>
+              <form class="plushie-wl-form" onsubmit="plushieSubmit(event)">
+                <input
+                  type="email"
+                  placeholder="Enter your email to reserve a plushie..."
+                  required
+                  class="plushie-wl-input"
+                  id="plushieEmailInput"
+                >
+                <button type="submit" class="btn-cartoon btn-cartoon-teal" style="white-space:nowrap; padding:12px 22px; font-size:0.9rem;">
+                  🧸 Reserve VIP Spot
+                </button>
+              </form>
+              <p class="plushie-wl-note">🔒 No spam, ever. You can unsubscribe any time. Your email won't be shared.</p>
+            </div>
+
+            <div class="features-list">
+              <div class="feature-bullet">🚚 Free Tracked Shipping worldwide on orders over $60</div>
+              <div class="feature-bullet">🎁 Gift-box packaging included</div>
+              <div class="feature-bullet">✅ Safety tested & CE certified</div>
+              <div class="feature-bullet">🌿 Eco-conscious packaging materials</div>
+            </div>
+          </div>
+        </div><!-- end product-hero-box -->
+
+        <!-- Gallery / Preview Section -->
+        <div class="product-glass-card product-spread-section">
+          <h3 class="product-glass-title">Plushie Preview Gallery</h3>
+          <div class="spread-gallery-grid">
+            <div class="gallery-thumbnail-card">
+              <img src="assets/images/shop/plushie.png" alt="Ooga Monster Plushie — Front View" loading="lazy" style="object-fit: contain; background: transparent;">
+              <div class="gallery-card-label">Front View — Emerald Classic</div>
+            </div>
+            <div class="gallery-thumbnail-card" style="display:flex;align-items:center;justify-content:center;min-height:200px;">
+              <div style="text-align:center; padding:20px;">
+                <span style="font-size:2.5rem;">🤫</span>
+                <p style="font-family:var(--font-fun);color:rgba(255,255,255,0.45);font-size:0.88rem;margin-top:8px;">More photos coming soon...</p>
+              </div>
+            </div>
+            <div class="gallery-thumbnail-card" style="display:flex;align-items:center;justify-content:center;min-height:200px;">
+              <div style="text-align:center; padding:20px;">
+                <span style="font-size:2.5rem;">🎨</span>
+                <p style="font-family:var(--font-fun);color:rgba(255,255,255,0.45);font-size:0.88rem;margin-top:8px;">Colour variants preview TBA</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ / What to Expect -->
+        <div class="product-glass-card" style="padding: 40px 36px;">
+          <h3 class="product-glass-title">What to Expect</h3>
+          <div style="display:flex;flex-direction:column;gap:18px;margin-top:16px;">
+            <div class="feature-bullet" style="font-size:0.95rem; line-height:1.6;">
+              <strong style="color:#fff;">📬 How will I be notified?</strong><br>
+              <span style="color:rgba(255,255,255,0.65);">Once you reserve your spot, you'll receive a confirmation email. When the plushie drops, we'll send a 24-hr early purchase link before we open to the public.</span>
+            </div>
+            <div class="feature-bullet" style="font-size:0.95rem; line-height:1.6;">
+              <strong style="color:#fff;">💳 Do I pay now?</strong><br>
+              <span style="color:rgba(255,255,255,0.65);">No — joining the waitlist is completely free. You'll only pay when you click the purchase link and complete your order.</span>
+            </div>
+            <div class="feature-bullet" style="font-size:0.95rem; line-height:1.6;">
+              <strong style="color:#fff;">📦 When will it ship?</strong><br>
+              <span style="color:rgba(255,255,255,0.65);">We're targeting delivery in early 2027. Exact dates will be communicated to waitlist members first.</span>
+            </div>
+            <div class="feature-bullet" style="font-size:0.95rem; line-height:1.6;">
+              <strong style="color:#fff;">🌏 Do you ship internationally?</strong><br>
+              <span style="color:rgba(255,255,255,0.65);">Yes! Worldwide tracked and insured shipping is planned. Shipping costs will vary by region and will be shown at checkout.</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end product-page-inner -->
+    </div><!-- end product-page-main -->
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div>
+        <div class="footer-brand-title">
+          <span class="brand-word-ooga">OOGA</span> <span class="brand-word-booga">BOOGA!</span>
+        </div>
+        <p class="footer-copy">An eccentric, joyous, and untamed vintage cartoon world.</p>
+        <div class="footer-badges-wrap">
+          <span class="trust-badge-pill footer-pill-pink">📖 First Edition 2026</span>
+          <span class="trust-badge-pill footer-pill-green">🇦🇺 Created in Australia</span>
+        </div>
+      </div>
+      <div>
+        <h4 class="footer-col-title">Explore The World</h4>
+        <ul class="footer-nav-list">
+          <li><a href="index.html" class="footer-nav-link">★ Home</a></li>
+          <li><a href="product.html" class="footer-nav-link">★ Order the Book</a></li>
+          <li><a href="tshirt.html" class="footer-nav-link">★ T-Shirts</a></li>
+          <li><a href="plushie.html" class="footer-nav-link">★ Plushie</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="footer-col-title">Suburban Monster Club</h4>
+        <p class="footer-sub-text">Sign up for exclusive early access to merch drops!</p>
+        <form onsubmit="plushieSubmit(event)" class="footer-form">
+          <input type="email" placeholder="Your email address..." required class="footer-email-input">
+          <button type="submit" class="footer-submit-btn">Join</button>
+        </form>
+      </div>
+    </div>
+    <div class="footer-bottom-bar">
+      <div>© 2026 Ooga Booga! All rights reserved. Written by Gianni Dolce Vita. Illustrated by Chiara Mendicino &amp; Artwork N.S.</div>
+    </div>
+  </footer>
+
+  <script src="assets/theme.js"></script>
+  <script>
+    // ── Colour variant selector ──
+    // All variants use the same image for now — swap src values once
+    // individual colour images are available (just update the imgMap below).
+    const imgMap = {
+      emerald:  'assets/images/shop/plushie.png',
+      coral:    'assets/images/shop/plushie.png',   // TODO: swap when coral image ready
+      midnight: 'assets/images/shop/plushie.png',   // TODO: swap when midnight image ready
+    };
+
+    function selectColour(colour) {
+      document.querySelectorAll('.variant-card[data-colour]').forEach(c => {
+        c.classList.toggle('selected', c.dataset.colour === colour);
+      });
+      const img = document.getElementById('plushieHeroImg');
+      if (img && imgMap[colour]) img.src = imgMap[colour];
+    }
+
+    // ── Waitlist submit ──
+    function plushieSubmit(event) {
+      event.preventDefault();
+      const input = event.target.querySelector('input[type="email"]');
+      const email = input ? input.value : '';
+      // TODO: Connect to Klaviyo / Mailchimp / your email service here.
+      alert(`🧸 You're reserved!\n\nWe'll send an early-access link to:\n${email}\n\n24 hours before the Ooga Monster Plushie goes on sale publicly.`);
+      if (input) input.value = '';
+    }
+  </script>
+</body>
+</html>

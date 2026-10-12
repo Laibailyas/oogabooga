@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/product", "destination": "/product.html" },
+    { "source": "/products/ooga-booga-hardcover", "destination": "/product.html" }
+  ]
+}

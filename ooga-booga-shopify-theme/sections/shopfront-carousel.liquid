@@ -1,0 +1,97 @@
+<section class="psd-section psd-section-storefront" id="village-shopfront" aria-label="Village Storefront Merchandise">
+  <!-- LAYER 1: Background Walls (Textured pink, teal, yellow architectural panels) -->
+  <div class="layer s3-layer" id="s3-l1-walls">
+    <img src="{{ 'images/parallax/section 3/Ooga.Booga.Website.Homepag 01.png' | asset_url }}" alt="Storefront Background Walls">
+  </div>
+
+  <!-- LAYER 2: Scalloped Trim / Awning Edge (Decorative wavy top awning borders) -->
+  <div class="layer s3-layer" id="s3-l2-trim">
+    <img src="{{ 'images/parallax/section 3/Ooga.Booga.Website.Homepag 02.png' | asset_url }}" alt="Storefront Scalloped Roof Trim">
+  </div>
+
+  <!-- LAYER 3: Storefront Arches & Windows (Striped awnings, curtains, and display areas) -->
+  <div class="layer s3-layer" id="s3-l3-windows">
+    <img src="{{ 'images/parallax/section 3/Ooga.Booga.Website.Homepag 03.png' | asset_url }}" alt="Shop Windows & Striped Awnings">
+  </div>
+
+  <!-- LAYER 4: Architectural Columns / Pillars (Vertical structural pillars) -->
+  <div class="layer s3-layer" id="s3-l4-pillars">
+    <img src="{{ 'images/parallax/section 3/Ooga.Booga.Website.Homepag 04.png' | asset_url }}" alt="Architectural Columns and Pillars">
+  </div>
+
+  <!-- LAYER 5: Fixtures & Bollards (Shadows, ground fixtures & side posts) -->
+  <div class="layer s3-layer" id="s3-l5-fixtures">
+    <img src="{{ 'images/parallax/section 3/Ooga.Booga.Website.Homepag 05.png' | asset_url }}" alt="Storefront Shadow and Fixtures">
+  </div>
+
+  <!-- LAYER 6: Hanging Golden Lanterns (Decorative hanging lanterns with idle sway) -->
+  <div class="layer s3-layer s3-swaying-lanterns" id="s3-l6-lanterns">
+    <img src="{{ 'images/parallax/section 3/Ooga.Booga.Website.Homepag 06.png' | asset_url }}" alt="Hanging Golden Lanterns">
+  </div>
+
+  <!-- LAYER 7: Sidewalk & Grass Ground (Pavement tiles and lower grassy lawn strip) -->
+  <div class="layer s3-layer" id="s3-l7-ground">
+    <img src="{{ 'images/parallax/section 3/Ooga.Booga.Website.Homepag 07.png' | asset_url }}" alt="Sidewalk Pavement and Lawn Ground">
+  </div>
+
+  <!-- LAYER 8: Illustrated Characters (Girl with pet, Boy, Green mascot waving) -->
+  <div class="layer s3-layer s3-living-chars" id="s3-l8-characters">
+    <img src="{{ 'images/parallax/section 3/Ooga.Booga.Website.Homepag 08.png' | asset_url }}" alt="Suburban Adventure Characters">
+  </div>
+
+  <!-- Interactive Window Displays (Windows 1, 2, 3) -->
+  <div class="s3-windows-container">
+    <!-- Window 1: Shop 1 with < prev button (Rotating 3D Display) -->
+    <div class="s3-window-display s3-window-1" id="s3Window1" role="button" tabindex="0" aria-label="Click to Pre-Order T-Shirt">
+      <button type="button" class="s3-shop-nav-btn s3-shop-prev" id="s3ShopPrev" aria-label="Previous T-Shirt">‹</button>
+      <span class="s3-window-badge" id="s3Badge1">COMING SOON</span>
+      <div class="s3-tshirt-scene">
+        <div class="s3-tshirt-flipper" id="s3Flipper1">
+          <div class="s3-tshirt-face s3-tshirt-front">
+            <img src="{{ 'images/shop/tshirt_mockup_ooga.png' | asset_url }}" alt="Wild Ooga Classic Vintage Tee" class="s3-tshirt-img" id="s3ImgFront1">
+          </div>
+          <div class="s3-tshirt-face s3-tshirt-back">
+            <img src="{{ 'images/shop/tshirt_mockup_ooga_back.png' | asset_url }}" alt="Wild Ooga Classic Vintage Tee Back" class="s3-tshirt-img" id="s3ImgBack1">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Window 2: Shop 2 with > next button (Rotating 3D Display) -->
+    <div class="s3-window-display s3-window-2" id="s3Window2" role="button" tabindex="0" aria-label="Click to Pre-Order T-Shirt">
+      <button type="button" class="s3-shop-nav-btn s3-shop-next" id="s3ShopNext" aria-label="Next T-Shirt">›</button>
+      <span class="s3-window-badge" id="s3Badge2">COMING SOON</span>
+      <div class="s3-tshirt-scene">
+        <div class="s3-tshirt-flipper reverse" id="s3Flipper2">
+          <div class="s3-tshirt-face s3-tshirt-front">
+            <img src="{{ 'images/shop/tshirt_mockup_boy.png' | asset_url }}" alt="Suburbia Run Adventure Tee" class="s3-tshirt-img" id="s3ImgFront2">
+          </div>
+          <div class="s3-tshirt-face s3-tshirt-back">
+            <img src="{{ 'images/shop/tshirt_mockup_boy_back.png' | asset_url }}" alt="Suburbia Run Adventure Tee Back" class="s3-tshirt-img" id="s3ImgBack2">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Window 3: Clickable Plushie Toy on Pedestal -->
+    <div class="s3-window-display s3-window-3" id="plushieShopZone" role="button" tabindex="0" aria-label="Official Ooga Booga Plushie Toy - Click to View!">
+      <span class="s3-window-badge s3-plushie-badge">Plushie</span>
+      <div class="s3-toy-hotspot"></div>
+    </div>
+  </div>
+
+</section>
+
+{% schema %}
+{
+  "name": "Shopfront & Plushie",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The Village Shopfront"
+    }
+  ]
+}
+{% endschema %}

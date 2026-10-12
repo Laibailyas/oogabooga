@@ -1,0 +1,69 @@
+<footer class="site-footer">
+  <div class="footer-container">
+    <div>
+      <div class="footer-brand-title">
+        <span class="brand-word-ooga">OOGA</span> <span class="brand-word-booga">BOOGA!</span>
+      </div>
+      <p class="footer-copy">
+        An eccentric, joyous, and untamed vintage cartoon world created by author Gianni Dolce Vita and brought to life with classic mid-century animation art and modern interactive web craft.
+      </p>
+      <div class="footer-badges-wrap">
+        <span class="trust-badge-pill footer-pill-pink">📖 First Edition 2026</span>
+        <span class="trust-badge-pill footer-pill-green">🇦🇺 Created in Australia</span>
+      </div>
+    </div>
+
+    <div>
+      <h4 class="footer-col-title">
+        Explore The World
+      </h4>
+      <ul class="footer-nav-list">
+        <li><a href="/" class="footer-nav-link">★ Home</a></li>
+        <li><a href="/products/ooga-booga-hardcover" class="footer-nav-link">★ Order the Book</a></li>
+        <li><a href="/pages/t-shirts" class="footer-nav-link">★ T-Shirts (Coming Soon)</a></li>
+        <li><a href="/pages/plushie" class="footer-nav-link">★ Plushie (Coming Soon)</a></li>
+        <li><a href="#reviews" class="footer-nav-link">★ Reader Testimonials</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h4 class="footer-col-title">
+        Suburban Monster Club
+      </h4>
+      <p class="footer-sub-text">
+        Sign up to receive secret character sketches, release announcements, and exclusive first access to upcoming plushies and apparel!
+      </p>
+      <form onsubmit="event.preventDefault(); alert('🎉 Welcome to the Suburban Monster Club!');" class="footer-form">
+        <input 
+          type="email" 
+          placeholder="Your email address..." 
+          required
+          class="footer-email-input"
+        >
+        <button type="submit" class="footer-submit-btn">
+          Join
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="footer-bottom-bar">
+    <div>
+      © 2026 Ooga Booga! All rights reserved. Written by Gianni Dolce Vita. Illustrated by Chiara Mendicino & Artwork N.S.
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Ooga Booga!"
+    }
+  ]
+}
+{% endschema %}

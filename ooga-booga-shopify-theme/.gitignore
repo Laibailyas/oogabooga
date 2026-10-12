@@ -1,0 +1,9 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Scratch temporary testing files
+scratch/
+assests/extracted_layers/
+*.psd

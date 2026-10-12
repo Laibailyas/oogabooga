@@ -1,0 +1,29 @@
+<!-- Cart Drawer Overlay -->
+<div class="cart-drawer-overlay" id="cartOverlay"></div>
+
+<!-- Slide-out Cart Drawer -->
+<div class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-label="Shopping Cart">
+  <div class="cart-drawer-header">
+    <div class="cart-drawer-title">🛒 Your Cart</div>
+    <button type="button" class="cart-close-btn" id="closeCartBtn" aria-label="Close cart">✕</button>
+  </div>
+
+  <div class="cart-drawer-body" id="cartDrawerItems">
+    <!-- Populated dynamically via theme.js -->
+  </div>
+
+  <div class="cart-drawer-footer">
+    <div class="cart-shipping-notice">
+      🎉 You qualify for FREE Tracked Shipping!
+    </div>
+
+    <div class="cart-subtotal-row">
+      <span>Subtotal:</span>
+      <span id="cartSubtotalAmount">$24.99</span>
+    </div>
+
+    <button type="button" class="btn-cartoon btn-cart-checkout" onclick="alert('Proceeding to Shopify Secure Checkout!')">
+      🔒 Secure Checkout
+    </button>
+  </div>
+</div>

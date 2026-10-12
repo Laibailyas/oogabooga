@@ -1,0 +1,55 @@
+<!doctype html>
+<html class="no-js" lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#f25287">
+    <link rel="canonical" href="{{ canonical_url }}">
+    
+    <title>
+      {{ page_title }}
+      {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
+      {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
+      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+    </title>
+
+    {% if page_description %}
+      <meta name="description" content="{{ page_description | escape }}">
+    {% else %}
+      <meta name="description" content="Step into the wild vintage cartoon world of Ooga Booga! Explore the official interactive 3D book, watch the animated short film, and discover coming soon merchandise.">
+    {% endif %}
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@400;600;700&family=Luckiest+Guy&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Shrikhand&display=swap" rel="stylesheet">
+
+    <!-- Theme Stylesheet -->
+    {{ 'theme.css' | asset_url | stylesheet_tag }}
+
+    <!-- Three.js + GLTFLoader for 3D Book Experience -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+    {{ content_for_header }}
+  </head>
+
+  <body class="template-{{ template.name | default: 'index' }}">
+    <div class="vintage-grain-overlay"></div>
+
+    {% section 'header' %}
+
+    <main id="MainContent" class="content-for-layout focus-none" role="main" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
+
+    {% section 'footer' %}
+
+    {% render 'cart-drawer' %}
+    {% render 'plushie-modal' %}
+
+    <!-- Theme Interactive Script -->
+    {{ 'theme.js' | asset_url | script_tag }}
+  </body>
+</html>

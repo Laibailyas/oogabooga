@@ -1,0 +1,83 @@
+<!-- Collectible Plushie Preview Modal -->
+<div class="modal-overlay" id="plushieModal" role="dialog" aria-modal="true" aria-label="Plushie Collectible Modal">
+  <div class="modal-cartoon-dialog">
+    <button type="button" class="modal-close-icon" aria-label="Close modal">✕</button>
+    
+    <div class="vintage-comic-tag" style="background-color: var(--color-yellow-accent); margin-bottom: 6px; font-size: 0.78rem; padding: 4px 14px;">
+      ★ OFFICIAL COLLECTIBLE TOY ★
+    </div>
+
+    <h3 style="font-family: var(--font-display); font-size: clamp(1.5rem, 2.6vw, 1.85rem); color: var(--color-purple-deep); margin-bottom: 2px; line-height: 1.15;">
+      Ooga Monster Plushie
+    </h3>
+    <div style="font-family: var(--font-fun); font-weight: 700; color: var(--color-pink-primary); font-size: 0.88rem; margin-bottom: 10px;">
+      LIMITED PRODUCTION RUN — COMING SOON!
+    </div>
+
+    <div style="background: #fff; border: 2px solid var(--color-border-cartoon); border-radius: var(--border-radius-md); padding: 10px 14px; margin-bottom: 12px; box-shadow: var(--shadow-cartoon-sm);">
+      <img 
+        src="{{ 'images/shop/plushie_window.png' | asset_url }}" 
+        alt="Ooga Booga Plushie Toy" 
+        style="width: 88px; height: 88px; object-fit: contain; margin: 0 auto; display: block; animation: creatureLaughWobble 3s infinite alternate;"
+      >
+      <p style="font-family: var(--font-body); font-size: 0.85rem; color: #433d59; line-height: 1.35; margin-top: 6px;">
+        Featuring ultra-soft hypoallergenic emerald plush fur, striped arms, signature cartoon fangs, and floppy ears. Crafted with love for hugs and adventures!
+      </p>
+    </div>
+
+    <form onsubmit="event.preventDefault(); alert('🎉 You are subscribed for priority Plushie reservation!'); document.getElementById('plushieModal').classList.remove('active');">
+      <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+        <input 
+          type="email" 
+          placeholder="Enter your email to reserve..." 
+          required 
+          style="flex: 1; padding: 10px 14px; border-radius: var(--border-radius-pill); border: 2px solid var(--color-border-cartoon); font-family: var(--font-body); font-size: 0.88rem; outline: none;"
+        >
+        <button type="submit" class="btn-cartoon btn-cartoon-yellow" style="background: var(--color-yellow-accent); color: var(--color-purple-deep); white-space: nowrap; padding: 10px 16px; font-size: 0.85rem;">
+          Reserve VIP Spot
+        </button>
+      </div>
+      <div style="font-size: 0.72rem; color: var(--color-text-muted); font-weight: 600; margin-bottom: 8px;">
+        No spam ever. You will receive an exclusive early purchase link 24 hours before public drop.
+      </div>
+    </form>
+
+    <div style="text-align: center;">
+      <a href="product.html" class="btn-cartoon btn-cartoon-teal" style="display: inline-block; padding: 7px 16px; font-size: 0.82rem; text-decoration: none;">
+        🔍 View Full Book & Merchandise Page ➔
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- General Merchandise Notify Modal -->
+<div class="modal-overlay" id="notifyModal" role="dialog" aria-modal="true" aria-label="Merchandise Waitlist Modal">
+  <div class="modal-cartoon-dialog">
+    <button type="button" class="modal-close-icon" aria-label="Close modal">✕</button>
+    
+    <div class="vintage-comic-tag" style="background-color: var(--color-teal-primary); color: #fff; margin-bottom: 12px;">
+      ★ COMING SOON TO SUBURBIA ★
+    </div>
+
+    <h3 style="font-family: var(--font-display); font-size: 2rem; color: var(--color-purple-deep); margin-bottom: 8px;">
+      Exclusive Apparel Drop
+    </h3>
+    <p style="font-family: var(--font-fun); font-weight: 600; color: #58506d; margin-bottom: 20px;">
+      Our 3D tailored vintage t-shirts are currently in pre-production. Enter your email to get notified the second they go live!
+    </p>
+
+    <form>
+      <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+        <input 
+          type="email" 
+          placeholder="Enter your email..." 
+          required 
+          style="flex: 1; padding: 12px 16px; border-radius: var(--border-radius-pill); border: 2px solid var(--color-border-cartoon); font-family: var(--font-body); outline: none;"
+        >
+        <button type="submit" class="btn-cartoon btn-cartoon-pink">
+          Notify Me
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

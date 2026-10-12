@@ -1,0 +1,43 @@
+<header class="site-header" id="SiteHeader">
+  <div class="header-container">
+    <!-- Brand Logo (Book Cover Reference Colors: Lime Green Ooga, Sky Blue Booga) -->
+    <a href="/" class="logo-wrapper">
+      <span class="brand-logo-text"><span class="brand-word-ooga">OOGA</span> <span class="brand-word-booga">BOOGA!</span></span>
+    </a>
+
+    <!-- Navigation Links -->
+    <nav class="main-nav-wrapper">
+      <ul class="main-nav">
+        <li><a href="/" class="nav-link">Home</a></li>
+        <li><a href="#reviews" class="nav-link">Reviews</a></li>
+        <li><a href="/products/ooga-booga-hardcover" class="nav-link nav-link-product">Book</a></li>
+        <li><a href="/pages/t-shirts" class="nav-link">T-Shirts</a></li>
+        <li><a href="/pages/plushie" class="nav-link">Plushie</a></li>
+      </ul>
+    </nav>
+
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <a href="/products/ooga-booga-hardcover" class="btn-cartoon btn-header-order">
+        Order Book
+      </a>
+      <button type="button" class="btn-cartoon btn-header-cart" id="openCartBtn">
+        🛒 Cart <span class="cart-btn-badge" id="cartCountBadge">1</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "text",
+      "id": "brand_title",
+      "label": "Brand Title",
+      "default": "Ooga Booga!"
+    }
+  ]
+}
+{% endschema %}

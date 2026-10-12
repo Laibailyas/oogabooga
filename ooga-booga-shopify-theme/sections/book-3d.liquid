@@ -1,0 +1,100 @@
+<section class="psd-section psd-section-forest" id="enchanted-forest" aria-label="Enchanted Pink Forest and 3D Book">
+  <!-- LAYER 1: Dark Purple Forest Background, Silhouettes & Glowing Teal River -->
+  <div class="s2-layer" id="s2-l-bg">
+    <img src="{{ 'parallax/section 2/Ooga.Booga.Website.Homepag 1.png' | asset_img_url: 'master' }}" alt="Enchanted Forest Night Sky and River">
+    <!-- Flowing River Water Simulation Stage -->
+    <div class="s2-river-flow-stage" aria-hidden="true">
+      <div class="s2-river-current s2-river-current-1"></div>
+      <div class="s2-river-current s2-river-current-2"></div>
+      <div class="s2-river-caustics"></div>
+      <div class="s2-river-ripples"></div>
+    </div>
+  </div>
+
+  <!-- LAYER 2: Pink Trees & Blue Hanging Canopy -->
+  <div class="s2-layer" id="s2-l-trees">
+    <img src="{{ 'parallax/section 2/Ooga.Booga.Website.Homepag (2).png' | asset_img_url: 'master' }}" alt="Pink Whimsical Trees and Blue Canopy">
+  </div>
+
+  <!-- Ambient forest sparkles / fireflies -->
+  <div class="s2-magic-particles" aria-hidden="true"></div>
+
+  <!-- LAYER 3: Characters & Motion — Boy, Green Mascot, Flying Apple -->
+  <div class="s2-layer" id="s2-l-chars">
+    <img src="{{ 'parallax/section 2/Ooga.Booga.Website.Homepag 3.png' | asset_img_url: 'master' }}" alt="Boy Character and Green Mascot on Tree">
+  </div>
+
+  <!-- LAYER 4: Pink Ladder, Cat Action & Water Splash (Foreground) -->
+  <div class="s2-layer" id="s2-l-cat">
+    <img src="{{ 'parallax/section 2/Ooga.Booga.Website.Homepag 4.png' | asset_img_url: 'master' }}" alt="Cat on Pink Ladder into River">
+  </div>
+
+  <!-- Left Side: 3D Interactive Rotating Book GLB Stage -->
+  <div class="s2-book-stage">
+    <!-- WebGL Canvas for 3D Book -->
+    <div class="s2-book-canvas-wrapper">
+      <div class="s2-book-canvas-container" id="book3dContainer" data-model-url="{{ 'models/Ooga_Booga_Hardcover_Render.glb' | asset_url }}"></div>
+    </div>
+
+    <!-- Quick Angle View Buttons -->
+    <div class="s2-book-controls-row">
+      <button type="button" class="btn-3d-ctrl" id="btn-view-cover">Front Cover</button>
+      <button type="button" class="btn-3d-ctrl" id="btn-view-spine">Spine</button>
+      <button type="button" class="btn-3d-ctrl" id="btn-view-back">Back Cover</button>
+      <button type="button" class="btn-3d-ctrl" id="btn-view-reset">Reset View</button>
+    </div>
+
+    <!-- Floating Glassmorphic Buy Box -->
+    <div class="s2-book-buy-card">
+      <div class="s2-card-title-row">
+        <div>
+          <h3 class="s2-card-title">Ooga Booga!</h3>
+          <div class="s2-card-subtitle">By Gianni Dolce Vita • Illus. by Chiara Mendicino</div>
+        </div>
+        <div class="s2-card-price" id="bookPriceDisplay">$24.99</div>
+      </div>
+
+      <!-- Edition Selector -->
+      <div class="s2-variant-selector">
+        <div class="s2-variant-btn variant-card selected" data-variant="hardcover">
+          <div class="s2-variant-name">Hardcover</div>
+          <div class="s2-variant-subtext">Collector Foil Cover</div>
+        </div>
+        <div class="s2-variant-btn variant-card" data-variant="softcover">
+          <div class="s2-variant-name">Softcover</div>
+          <div class="s2-variant-subtext">Bedtime Paperback</div>
+        </div>
+      </div>
+
+      <div class="s2-card-actions">
+        <div class="quantity-stepper">
+          <button type="button" class="stepper-btn" id="qtyMinusBtn">-</button>
+          <input type="number" id="productQtyInput" class="stepper-value" value="1" min="1" max="10" readonly>
+          <button type="button" class="stepper-btn" id="qtyPlusBtn">+</button>
+        </div>
+
+        <button type="button" class="btn-cartoon btn-cartoon-pink s2-buy-btn" id="btnAddToCart">
+          🛒 Add to Cart
+        </button>
+
+        <a href="/products/ooga-booga-book" class="btn-cartoon btn-cartoon-teal s2-look-inside-btn" title="View Full Spreads">
+          🔍 Look Inside
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "3D Book Showcase",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Ooga Booga!"
+    }
+  ]
+}
+{% endschema %}

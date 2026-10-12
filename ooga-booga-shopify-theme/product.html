@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ooga Booga! — Collector's Hardcover Edition</title>
+  <meta name="description" content="Official Ooga Booga! Hardcover & Softcover book editions. Featuring rotating 3D preview, spread previews, and customer reviews.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@400;600;700&family=Luckiest+Guy&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Shrikhand&display=swap" rel="stylesheet">
+
+  <!-- Theme CSS -->
+  <link rel="stylesheet" href="assets/theme.css">
+
+  <!-- Three.js + GLTFLoader for 3D Book Experience -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+</head>
+
+<body class="template-product">
+  <div class="vintage-grain-overlay"></div>
+
+  <!-- ============================================================
+       SITE HEADER — matches homepage & Shopify liquid header.liquid
+       ============================================================ -->
+  <header class="site-header" id="SiteHeader">
+    <div class="header-container">
+
+      <!-- Logo -->
+      <a href="index.html" class="logo-wrapper">
+        <span class="brand-logo-text">
+          <span class="brand-word-ooga">OOGA</span>
+          <span class="brand-word-booga">BOOGA!</span>
+        </span>
+      </a>
+
+      <!-- Nav — identical to homepage & Shopify header.liquid -->
+      <nav class="main-nav-wrapper">
+        <ul class="main-nav">
+          <li><a href="index.html"          class="nav-link">Home</a></li>
+          <li><a href="index.html#reviews"  class="nav-link">Reviews</a></li>
+          <li><a href="product.html"        class="nav-link nav-link-product active">Book</a></li>
+          <li><a href="tshirt.html"         class="nav-link">T-Shirts</a></li>
+          <li><a href="plushie.html"        class="nav-link">Plushie</a></li>
+        </ul>
+      </nav>
+
+      <!-- Actions -->
+      <div class="header-actions">
+        <a href="product.html" class="btn-cartoon btn-header-order">
+          Order Book
+        </a>
+        <button type="button" class="btn-cartoon btn-header-cart" id="openCartBtn">
+          🛒 Cart <span class="cart-btn-badge" id="cartCountBadge">1</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ============================================================
+       TRUST BAR — continuous marquee (same as homepage)
+       ============================================================ -->
+  <div class="trust-top-bar" id="reviews-trust-bar">
+    <div class="trust-ticker-track">
+
+      <!-- Group 1 -->
+      <div class="trust-ticker-group">
+        <div class="trust-item">
+          <span class="gold-laurel-stamp"><span class="laurel-icon">🌿</span> 5-STAR REVIEWS <span class="laurel-icon">🌿</span></span>
+          <span class="stars-rating">★★★★★</span>
+          <span>4.9 / 5 Rating From Early Readers</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-badge-pill">🏆 Official Selection</span>
+          <span>Whimsical Children's Adventure Guild</span>
+        </div>
+        <div class="trust-item">
+          <span class="gold-laurel-stamp"><span class="laurel-icon">🌿</span> CRITICS' CHOICE <span class="laurel-icon">🌿</span></span>
+          <span class="stars-rating">★★★★★</span>
+          <span>Acclaimed Picture Book Premiere</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-badge-pill">📚 Collector's Edition</span>
+          <span>Gold Foil Embossed Stamped Cover</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-badge-pill">✈️ Worldwide Delivery</span>
+          <span>Tracked & Insured Shipping</span>
+        </div>
+      </div>
+
+      <!-- Group 2 (duplicate for seamless loop) -->
+      <div class="trust-ticker-group" aria-hidden="true">
+        <div class="trust-item">
+          <span class="gold-laurel-stamp"><span class="laurel-icon">🌿</span> 5-STAR REVIEWS <span class="laurel-icon">🌿</span></span>
+          <span class="stars-rating">★★★★★</span>
+          <span>4.9 / 5 Rating From Early Readers</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-badge-pill">🏆 Official Selection</span>
+          <span>Whimsical Children's Adventure Guild</span>
+        </div>
+        <div class="trust-item">
+          <span class="gold-laurel-stamp"><span class="laurel-icon">🌿</span> CRITICS' CHOICE <span class="laurel-icon">🌿</span></span>
+          <span class="stars-rating">★★★★★</span>
+          <span>Acclaimed Picture Book Premiere</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-badge-pill">📚 Collector's Edition</span>
+          <span>Gold Foil Embossed Stamped Cover</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-badge-pill">✈️ Worldwide Delivery</span>
+          <span>Tracked & Insured Shipping</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PRODUCT PAGE MAIN
+       ============================================================ -->
+  <div class="product-page-main">
+    <div class="product-page-inner">
+
+      <!-- Back link -->
+      <div style="margin-bottom: 24px;">
+        <a href="index.html" class="btn-product-back">← Back to Ooga Booga World</a>
+      </div>
+
+      <!-- ── PRODUCT HERO: 3D Stage + Buy Box ── -->
+      <div class="product-hero-box">
+
+        <!-- 3D Interactive Stage -->
+        <div class="book-3d-stage-wrapper">
+          <div
+            class="canvas-3d-container"
+            id="book3dContainer"
+            data-model-url="assets/models/Ooga_Booga_Hardcover_Render.glb"
+            style="height: 480px;">
+          </div>
+
+          <div class="book-3d-controls">
+            <button type="button" class="btn-3d-ctrl" id="btn-view-cover">Front Cover</button>
+            <button type="button" class="btn-3d-ctrl" id="btn-view-spine">Spine</button>
+            <button type="button" class="btn-3d-ctrl" id="btn-view-back">Back Cover</button>
+            <button type="button" class="btn-3d-ctrl" id="btn-view-reset">Reset View</button>
+          </div>
+        </div>
+
+        <!-- Buy Box -->
+        <div>
+          <div class="book-author-tag">Official Book Release • Gianni Dolce Vita</div>
+          <h1 class="book-title">Ooga Booga!</h1>
+          <div class="book-subtitle">Collector's First Edition</div>
+
+          <div class="stars-rating">★★★★★ <span>(4.9 / 5 from 148 reviews)</span></div>
+
+          <p class="book-description">
+            Step into the wild vintage cartoon world! When an unruly monster escapes his wooden crate,
+            Suburbia is thrown into joyful chaos. Featuring stunning hand-illustrated art, humorous
+            storytelling, and a timeless 1950s animation feel.
+          </p>
+
+          <!-- Edition Variants -->
+          <div class="variant-selector-group">
+            <label class="variant-label">Choose Edition:</label>
+            <div class="variant-options-grid">
+              <div class="variant-card selected" data-variant="hardcover">
+                <span class="variant-title">Hardcover Edition</span>
+                <span class="variant-price">$24.99</span>
+                <span class="variant-subtext">Gold Foil Embossed Stamped Cover</span>
+              </div>
+              <div class="variant-card" data-variant="softcover">
+                <span class="variant-title">Softcover Edition</span>
+                <span class="variant-price">$16.99</span>
+                <span class="variant-subtext">Flexible Lightweight Paperback</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add to Cart -->
+          <div class="purchase-action-box">
+            <div class="quantity-stepper">
+              <button type="button" class="stepper-btn" id="qtyMinusBtn">-</button>
+              <input type="number" id="productQtyInput" class="stepper-value" value="1" min="1" max="10" readonly>
+              <button type="button" class="stepper-btn" id="qtyPlusBtn">+</button>
+            </div>
+            <button type="button" class="btn-cartoon btn-cartoon-pink" id="btnAddToCart" style="flex: 1;">
+              🛒 Add to Cart — <span id="bookPriceDisplay">$24.99</span>
+            </button>
+          </div>
+
+          <!-- Feature Bullets -->
+          <div class="features-list">
+            <div class="feature-bullet">📖 Format: 8.5" x 11" Hardcover</div>
+            <div class="feature-bullet">🎨 48 Full Color Archival Spreads</div>
+            <div class="feature-bullet">👶 Ages: 4 to 10+ (Family Favorite)</div>
+            <div class="feature-bullet">🚚 Free Tracked Shipping Over $40</div>
+          </div>
+        </div>
+
+      </div><!-- /product-hero-box -->
+
+      <!-- ── SPREAD GALLERY ── -->
+      <div class="product-glass-card product-spread-section">
+        <h3 class="product-glass-title">Book Artwork & Spread Previews</h3>
+
+        <div class="spread-gallery-grid">
+          <div class="gallery-thumbnail-card">
+            <img src="assets/images/product/book_cover_spread.png" alt="Full Cover & Back Spread Artwork" loading="lazy">
+            <div class="gallery-card-label">Full Dustjacket & Spine Spread</div>
+          </div>
+          <div class="gallery-thumbnail-card">
+            <img src="assets/images/product/tree_scene.png" alt="Enchanted Forest Scene Spread" loading="lazy">
+            <div class="gallery-card-label">Forest River Scene Spread</div>
+          </div>
+          <div class="gallery-thumbnail-card">
+            <img src="assets/images/product/shops_scene.png" alt="Village Main Street Scene Spread" loading="lazy">
+            <div class="gallery-card-label">Suburbia Town Scene Spread</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── REVIEWS ── -->
+      <div class="product-glass-card product-reviews-section">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-bottom:32px;">
+          <div>
+            <h3 class="product-glass-title" style="margin-bottom:6px;">Customer Reviews</h3>
+            <div style="color:#ffb800; font-size:1.25rem;">
+              ★★★★★
+              <span style="font-family:var(--font-fun); font-size:0.95rem; color:rgba(255,255,255,0.85); font-weight:700;">
+                Based on 148 verified reviews
+              </span>
+            </div>
+          </div>
+          <button type="button" class="btn-product-back" style="color:#ffffff; cursor:pointer;">✍️ Write a Review</button>
+        </div>
+
+        <div class="reviews-grid">
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <p class="review-quote">"Magnificent printing quality. The colors pop right off the page and the story has become an instant classic in our house."</p>
+            <div class="reviewer-footer">
+              <div class="reviewer-avatar">JL</div>
+              <div class="reviewer-meta">
+                <span class="reviewer-name">Jessica L.</span>
+                <span class="reviewer-verified">✓ Verified Hardcover Purchaser</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <p class="review-quote">"My students were captivated by the illustrations. A masterclass in vintage children's book design."</p>
+            <div class="reviewer-footer">
+              <div class="reviewer-avatar">TR</div>
+              <div class="reviewer-meta">
+                <span class="reviewer-name">Thomas R.</span>
+                <span class="reviewer-verified">✓ Verified Teacher Purchaser</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <p class="review-quote">"The artwork feels like a lost classic from the golden age of animation. My 6-year-old insists on reading it every single bedtime!"</p>
+            <div class="reviewer-footer">
+              <div class="reviewer-avatar">SP</div>
+              <div class="reviewer-meta">
+                <span class="reviewer-name">Sarah P. (Melbourne, AU)</span>
+                <span class="reviewer-verified">✓ Verified Early Reader</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <p class="review-quote">"Hilarious, wonderfully paced, and packed with charm. The hardcover foil quality is breathtaking in person. A collector's dream."</p>
+            <div class="reviewer-footer">
+              <div class="reviewer-avatar">DM</div>
+              <div class="reviewer-meta">
+                <span class="reviewer-name">David M. (Sydney, AU)</span>
+                <span class="reviewer-verified">✓ School Librarian</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /product-page-inner -->
+  </div><!-- /product-page-main -->
+
+  <!-- ============================================================
+       FOOTER — matches homepage & Shopify liquid footer.liquid
+       ============================================================ -->
+  <footer class="site-footer">
+    <div class="footer-container">
+
+      <!-- Col 1: Brand -->
+      <div>
+        <div class="footer-brand-title">
+          <span class="brand-word-ooga">OOGA</span> <span class="brand-word-booga">BOOGA!</span>
+        </div>
+        <p class="footer-copy">
+          An eccentric, joyous, and untamed vintage cartoon world created by author Gianni Dolce Vita
+          and brought to life with classic mid-century animation art and modern interactive web craft.
+        </p>
+        <div class="footer-badges-wrap">
+          <span class="trust-badge-pill footer-pill-pink">📖 First Edition 2026</span>
+          <span class="trust-badge-pill footer-pill-green">🇦🇺 Created in Australia</span>
+        </div>
+      </div>
+
+      <!-- Col 2: Quick Links -->
+      <div>
+        <h4 class="footer-col-title">Explore The World</h4>
+        <ul class="footer-nav-list">
+          <li><a href="index.html"          class="footer-nav-link">★ Home</a></li>
+          <li><a href="product.html"        class="footer-nav-link">★ Order the Book</a></li>
+          <li><a href="tshirt.html"         class="footer-nav-link">★ T-Shirts (Coming Soon)</a></li>
+          <li><a href="plushie.html"        class="footer-nav-link">★ Plushie (Coming Soon)</a></li>
+          <li><a href="index.html#reviews"  class="footer-nav-link">★ Reader Testimonials</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 3: Email signup -->
+      <div>
+        <h4 class="footer-col-title">Suburban Monster Club</h4>
+        <p class="footer-sub-text">
+          Sign up to receive secret character sketches, release announcements, and exclusive first
+          access to upcoming plushies and apparel!
+        </p>
+        <form onsubmit="event.preventDefault(); alert('🎉 Welcome to the Suburban Monster Club!');" class="footer-form">
+          <input type="email" placeholder="Your email address..." required class="footer-email-input">
+          <button type="submit" class="footer-submit-btn">Join</button>
+        </form>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom-bar">
+      <div>
+        © 2026 Ooga Booga! All rights reserved. Written by Gianni Dolce Vita.
+        Illustrated by Chiara Mendicino & Artwork N.S.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       CART DRAWER
+       ============================================================ -->
+  <div class="cart-drawer-overlay" id="cartOverlay"></div>
+
+  <div class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-label="Shopping Cart">
+    <div class="cart-drawer-header">
+      <div class="cart-drawer-title">🛒 Your Cart</div>
+      <button type="button" class="cart-close-btn" id="closeCartBtn" aria-label="Close cart">✕</button>
+    </div>
+
+    <div class="cart-drawer-body" id="cartDrawerItems"></div>
+
+    <div class="cart-drawer-footer">
+      <div class="cart-shipping-notice">
+        🎉 You qualify for FREE Tracked Shipping!
+      </div>
+      <div class="cart-subtotal-row">
+        <span>Subtotal:</span>
+        <span id="cartSubtotalAmount">$24.99</span>
+      </div>
+      <button type="button" class="btn-cartoon btn-cart-checkout" onclick="alert('Proceeding to Checkout!')">
+        🔒 Secure Checkout
+      </button>
+    </div>
+  </div>
+
+  <!-- THEME SCRIPT -->
+  <script src="assets/theme.js"></script>
+</body>
+</html>
