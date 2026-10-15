@@ -2,7 +2,11 @@
   <!-- LAYER 1: Dark Purple Forest Background, Silhouettes & Glowing Teal River -->
   <div class="s2-layer" id="s2-l-bg">
     <img src="{{ 'parallax/section 2/Ooga.Booga.Website.Homepag 1.png' | asset_img_url: 'master' }}" alt="Enchanted Forest Night Sky and River">
-    <!-- Flowing River Water Simulation Stage -->
+  </div>
+
+  <!-- River edge stays anchored to the storefront on narrow screens. -->
+  <div class="s2-river-seam" aria-hidden="true">
+    <img class="s2-river-seam-img" src="{{ 'images/parallax/section 2/river-bridge.webp' | asset_url }}" alt="">
     <div class="s2-river-flow-stage" aria-hidden="true">
       <div class="s2-river-current s2-river-current-1"></div>
       <div class="s2-river-current s2-river-current-2"></div>

@@ -16,7 +16,7 @@
     rel="stylesheet">
 
   <!-- Theme CSS -->
-  <link rel="stylesheet" href="assets/theme.css">
+    <link rel="stylesheet" href="assets/theme.css?v=river-seam-12">
 
   <!-- Three.js + GLTFLoader for 3D Book Experience -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -204,7 +204,11 @@
              Full-width fill. Speed: 0.05–0.10x (very slow deep background) -->
         <div class="s2-layer" id="s2-l-bg">
           <img src="assets/images/parallax/section 2/Ooga.Booga.Website.Homepag 1.png" alt="Enchanted Forest Night Sky and River">
-          <!-- Flowing River Water Simulation Stage -->
+        </div>
+
+        <!-- River edge stays anchored to the storefront on narrow screens. -->
+        <div class="s2-river-seam" aria-hidden="true">
+          <img class="s2-river-seam-img" src="assets/images/parallax/section 2/river-bridge.webp" alt="">
           <div class="s2-river-flow-stage" aria-hidden="true">
             <div class="s2-river-current s2-river-current-1"></div>
             <div class="s2-river-current s2-river-current-2"></div>
@@ -313,6 +317,12 @@
         <!-- LAYER 3: Storefront Arches & Windows (Striped awnings, curtains, and display areas) -->
         <div class="layer s3-layer" id="s3-l3-windows">
           <img src="assets/images/parallax/section 3/Ooga.Booga.Website.Homepag 03.png" alt="Shop Windows & Striped Awnings">
+          <!-- Sunlight and its awning cover share the window's movement. -->
+          <div class="layer s3-layer" id="s3-l-rays" aria-hidden="true">
+            <img src="assets/images/parallax/section 3/Ooga.Booga.Website.Homepag 08.rays.png" alt="">
+          </div>
+          <img class="s3-awning-occluder" src="assets/images/parallax/section 3/Ooga.Booga.Website.Homepag 03.png" alt="" aria-hidden="true">
+          <img class="s3-planter-occluder" src="assets/images/parallax/section 3/Ooga.Booga.Website.Homepag 03.png" alt="" aria-hidden="true">
         </div>
 
         <!-- LAYER 4: Architectural Columns / Pillars (Vertical structural pillars) -->
@@ -337,7 +347,7 @@
 
         <!-- LAYER 8: Illustrated Characters (Girl with pet, Boy, Green mascot waving) -->
         <div class="layer s3-layer s3-living-chars" id="s3-l8-characters">
-          <img src="assets/images/parallax/section 3/Ooga.Booga.Website.Homepag 08.png" alt="Suburban Adventure Characters">
+          <img src="assets/images/parallax/section 3/Ooga.Booga.Website.Homepag 08.characters.png" alt="Suburban Adventure Characters">
         </div>
 
         <!-- Interactive Window Displays (3D Rotating T-Shirts & Clickable Plushie Zone) -->
@@ -380,11 +390,14 @@
             </div>
           </div>
 
+
           <!-- Window 3: Clickable Plushie Toy on Pedestal -->
           <div class="s3-window-display s3-window-3" id="plushieShopZone" role="button" tabindex="0"
             aria-label="Official Ooga Booga Plushie Toy - Click to View!">
             <span class="s3-window-badge s3-plushie-badge">Plushie</span>
-            <div class="s3-toy-hotspot"></div>
+            <div class="s3-toy-hotspot">
+              <img src="assets/images/shop/plushie_seated.png" alt="Official Ooga Booga Plushie Toy" class="s3-plushie-window-img">
+            </div>
           </div>
           </div>
         </div>

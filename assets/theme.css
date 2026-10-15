@@ -983,8 +983,8 @@ body.template-index {
   position: relative;
   width: 100vw;
   max-width: 100%;
-  height: 61.78vw;   /* exact aspect from reference 934:577 / 3000:1853 */
-  min-height: 540px;
+  height: 70vw;   /* exact aspect from reference 934:577 / 3000:1853 */
+  min-height: 580px;
   overflow: visible;
   background: #0d0a1e;
   z-index: 5;
@@ -1004,7 +1004,7 @@ body.template-index {
   top: -3vw;
   left: 0;
   width: 100vw;
-  height: 65vw;  /* generous headroom so 2x parallax never reveals top seam */
+  height: calc(100% + 5vw);  /* generous headroom so 2x parallax never reveals top seam */
   z-index: 1;
 }
 #l-bg img {
@@ -1104,7 +1104,7 @@ body.template-index {
 
 /* ── LAYER 4: Stones (Audience seats subtle idle float) ── */
 #l-stones {
-  bottom: 8.7vw;
+  bottom: 9.6vw;    /* FIXED: below the screen frame on the lawn, not overlapping the bottom beam */
   left: 50%;
   transform: translateX(-50%);
   width: 55.87vw;   /* 1676/3000*100 */
@@ -1135,7 +1135,7 @@ body.template-index {
   bottom: 0;
   left: 0;
   width: 100vw;
-  height: 33.40vw;  /* 1002/3000*100 */
+  height: 38vw;  /* 1002/3000*100 */
   z-index: 6;
 }
 #l-projector img {
@@ -1165,8 +1165,8 @@ body.template-index {
 
 /* ── LAYER 6: Pineapple Character (Lively Projectionist Idle Bounce & Breathing) ── */
 #l-character {
-  bottom: 5.0vw;
-  left: 50%;
+  bottom: 5.2vw;          /* FIXED: standing firmly on stage, hand between both wheels */
+  left: 47.6%;            /* FIXED: hand rests between the two wheels of the projector */
   transform: translateX(-50%);
   width: 16.80vw;   /* 504/3000*100 */
   height: 19.40vw;  /* 582/3000*100 */
@@ -1187,10 +1187,10 @@ body.template-index {
     transform: translateY(0px) scale(1, 1) rotate(0deg);
   }
   40% {
-    transform: translateY(-4px) scale(1.025, 0.98) rotate(-0.5deg);
+    transform: translateY(-1.5px) scale(1.008, 0.995) rotate(-0.25deg);
   }
   100% {
-    transform: translateY(-7.5px) scale(0.98, 1.035) rotate(0.8deg);
+    transform: translateY(-2.5px) scale(0.995, 1.008) rotate(0.3deg);
   }
 }
 
@@ -1341,7 +1341,7 @@ body.template-index {
   height: 62.27vw;              /* 1868 / 3000 × 100vw exact PSD ratio */
   background: #1a0d38;          /* Deep purple forest night */
   overflow: visible;            /* Allows Layer 2 canopy to bleed into Section 1 */
-  margin-top: 0;                /* Seamlessly meets Section 1 bottom */
+  margin-top: -1.20vw;          /* Micro-overlap: connects forest canopy to cinema grass without covering stage */
   z-index: 6;                   /* Above Section 1 (z-index 5) so canopy overlaps seamlessly */
 }
 
@@ -1371,6 +1371,42 @@ body.template-index {
   z-index: 1;
 }
 
+/* The last 700px of the forest, at its original scale. Keeping the shore
+   stationary lets the ladder pivot in the water while the canopy moves. */
+.s2-river-seam {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 23.3333vw;
+  z-index: 2;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.s2-river-seam-img {
+  display: block;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  mask-image: linear-gradient(to bottom, transparent, #000 40%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 40%);
+}
+
+/* A small water-only underlap covers the transparent scallops of the trim. */
+.s2-river-seam::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% - 1px);
+  height: 2.5vw;
+  background: url('images/parallax/section 2/river-bridge.webp') center bottom / 100vw 23.3333vw no-repeat;
+}
+
 /* ==========================================================================
    SECTION 2: NATURAL FLOWING RIVER SIMULATION
    Applies organic flowing water currents, caustics, and ripples strictly to lower water basin (19%)
@@ -1380,7 +1416,7 @@ body.template-index {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 19%;
+  height: 7vw;
   pointer-events: none;
   overflow: hidden;
   z-index: 2;
@@ -1545,13 +1581,13 @@ body.template-index {
 }
 
 /* ── LAYER 3: Characters — Boy, Green Mascot, Flying Apple (right-center, 0.45x) ──
-   Moved up with trees (-0.90vw) so characters remain precisely on tree branches */
+   Positioned precisely at exact PSD coordinates so boy and mascot sit securely inside tree branch notches */
 #s2-l-chars {
-  top: 4.70vw;
-  left: 49.50vw;
+  top: 4.47vw;                  /* EXACT PSD: seats boy's foot into tree fork and mascot onto branch */
+  left: 48.47vw;                /* EXACT PSD: aligns boy and green mascot directly onto tree branches */
   width: 44.93vw;               /* 1348 / 3000 × 100 */
   height: 19.17vw;              /* 575  / 3000 × 100 */
-  z-index: 4;
+  z-index: 5;                   /* FIXED: apple and characters render in front of cat and ladder */
 }
 #s2-l-chars img {
   object-fit: contain;
@@ -1562,22 +1598,22 @@ body.template-index {
 
 @keyframes s2CharactersGentleBob {
   0% {
-    transform: translateY(0px) rotate(-0.35deg);
+    transform: translateY(0px) rotate(-0.25deg);
   }
   100% {
-    transform: translateY(-3.5px) rotate(0.40deg);
+    transform: translateY(0px) rotate(0.25deg);
   }
 }
 
 /* ── LAYER 4: Pink Ladder, Cat & River Splash (Bottom fixed, top falls backwards) ──
-   Bottom ladder foot stays anchored in river (28% 90%), top cat/ladder tilts backwards on scroll */
+   Pivot at the submerged rail; the river strip below is stationary too. */
 #s2-l-cat {
-  top: 7.20vw;
-  left: 57.50vw;
+  top: 6.20vw;                  /* FIXED: lowers cat slightly so apple rests right near the ear */
+  left: 55.20vw;                /* FIXED: shifts cat slightly right so apple hits near the ear */
   width: 41.03vw;               /* 1231 / 3000 × 100 */
   height: 58.47vw;              /* 1754 / 3000 × 100 */
-  z-index: 5;
-  transform-origin: 28% 90%;
+  z-index: 4;                   /* Cat sits behind characters and apple */
+  transform-origin: 28% 86%;
   will-change: transform;
 }
 #s2-l-cat img {
@@ -1925,12 +1961,12 @@ body.template-index {
   position: relative;
   width: 100vw;
   max-width: 100%;
-  aspect-ratio: 3000 / 1848;
-  height: 61.60vw;
+  height: 69.60vw;
   background: transparent;
   overflow: hidden;
-  margin-top: -3.20vw; /* Seamless overlap: connects Section 3 roof trim directly with Section 2 river with no gap */
-  z-index: 3;
+  margin-top: -4vw; /* The painted river meets the trim before the roofs begin. */
+  z-index: 7; /* Put the authored wavy river trim above the forest water. */
+  pointer-events: none;
 }
 
 /* Base layer positioning for Section 3 (8 Art Layers) */
@@ -1952,12 +1988,15 @@ body.template-index {
   -webkit-user-drag: none;
 }
 
-/* ── LAYER 1: Background Walls (Pink, Teal, Yellow Architectural Panels) ──
-   Top transparent part (rows 0-178) remains visible at top: 0, wall panels start at row 178 */
+/* Lift the textured walls under the scallops while retaining their lower edge. */
 #s3-l1-walls {
-  top: 0;
-  height: 60.40vw;
+  top: -2vw;
+  height: 62.40vw;
   z-index: 1;
+}
+#s3-l1-walls img {
+  mask-image: linear-gradient(to bottom, transparent 0%, transparent 9.9%, #000 10.6%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 9.9%, #000 10.6%);
 }
 
 /* ── LAYER 2: Scalloped Trim / Awning Edge (Decorative Wavy Top Border) ──
@@ -1971,6 +2010,8 @@ body.template-index {
   transform-origin: 50% 0%;
   animation: s3AwningFlutter 5.5s ease-in-out infinite alternate;
   will-change: transform;
+  mask-image: linear-gradient(to bottom, transparent 0%, transparent 30%, #000 39%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 30%, #000 39%);
 }
 
 @keyframes s3AwningFlutter {
@@ -1988,6 +2029,34 @@ body.template-index {
   top: 2.80vw;
   height: 46.13vw;
   z-index: 3;
+}
+
+/* Authored sunlight mask extracted from the original foreground artwork.
+   Its source alpha carries the stronger center ray and softer side rays. */
+#s3-l-rays {
+  top: 5.8vw; /* Start behind the awning and reach the planters. */
+  height: 64vw;
+  z-index: 1;
+}
+
+/* Reuse the top of the window artwork to conceal the ray origins. */
+#s3-l3-windows > .s3-awning-occluder {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  mask-image: linear-gradient(to bottom, #000 0%, #000 26%, transparent 30%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 26%, transparent 30%);
+  pointer-events: none;
+}
+
+/* Put the painted foliage in front of the rays as they reach each planter. */
+#s3-l3-windows > .s3-planter-occluder {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  mask-image: linear-gradient(to bottom, transparent 0%, transparent 67%, #000 74%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 67%, #000 74%);
+  pointer-events: none;
 }
 
 /* ── LAYER 4: Architectural Columns / Pillars (Vertical Pillars Separating Bays) ──
@@ -2034,22 +2103,23 @@ body.template-index {
 
 /* ── LAYER 7: Sidewalk & Grass Ground (Tiled Pavement & Lower Grass Strip) ── */
 #s3-l7-ground {
-  top: 48.13vw;
-  height: 16.57vw;
+  top: 53vw;
+  height: 18vw;
   z-index: 7;
 }
 
-/* ── LAYER 8: Illustrated Characters (Girl with puppy, Boy, Waving Green Monster) ── */
+/* ── LAYER 8: Foreground Characters (sun rays and merchandise are separate layers) ── */
 #s3-l8-characters {
-  top: 10.80vw;
+  top: 16.50vw;
   height: 54.07vw;
-  z-index: 8;
+  z-index: 20;
+  pointer-events: none;
 }
 
-/* Playful breathing and waving idle bounce for the living characters */
+/* Playful breathing and waving idle bounce without lifting characters off ground/table */
 .s3-living-chars img,
 #s3-l8-characters img {
-  transform-origin: 50% 90%;
+  transform-origin: 50% 100%;
   animation: s3LivingCharsBreathe 3s ease-in-out infinite alternate;
   will-change: transform;
 }
@@ -2059,10 +2129,10 @@ body.template-index {
     transform: scale(1) translateY(0px) rotate(0deg);
   }
   50% {
-    transform: scale(1.01, 1.015) translateY(-3px) rotate(0.35deg);
+    transform: scale(1.006, 1.008) translateY(0px) rotate(0.18deg);
   }
   100% {
-    transform: scale(0.995, 1.025) translateY(-6px) rotate(-0.35deg);
+    transform: scale(0.998, 1.012) translateY(0px) rotate(-0.18deg);
   }
 }
 
@@ -2072,7 +2142,7 @@ body.template-index {
   position: absolute;
   inset: 0;
   width: 100%;
-  height: 100%;
+  height: 61.60vw; /* Window coordinates stay independent of the extra foreground. */
   z-index: 15;
   pointer-events: none;
 }
@@ -2086,6 +2156,7 @@ body.template-index {
   transform: translate(-50%, -50%);
   width: 17%;
   height: 33%;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2220,7 +2291,7 @@ body.template-index {
 
 /* Soft Pink Hover Glow on Window 3 (Plushie Toy) matching Header/Button Pink */
 .s3-window-3:hover {
-  transform: translate(-50%, -50%) scale(1.05);
+  transform: translate(-50%, -50%);
   filter: drop-shadow(0 0 16px rgba(242, 82, 135, 0.45)) drop-shadow(0 0 28px rgba(255, 64, 129, 0.3));
 }
 
@@ -2242,6 +2313,59 @@ body.template-index {
   outline: none !important;
   background: transparent;
   transition: all 0.3s ease;
+}
+
+
+
+/* Plushie display image — seated cleanly ON TOP surface of the display pedestal */
+.s3-plushie-window-img {
+  position: absolute;
+  bottom: 17%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5.6vw;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  z-index: 25;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 2px 2px rgba(42, 9, 73, 0.35));
+  animation: plushieSeatedBob 3.6s ease-in-out infinite alternate;
+  will-change: transform;
+  transition: filter 0.3s ease;
+}
+
+/* Gentle charming idle movement on display pedestal */
+@keyframes plushieSeatedBob {
+  0% {
+    transform: translateX(-50%) translateY(0) scale(1, 1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.015, 0.99);
+  }
+  100% {
+    transform: translateX(-50%) translateY(0) scale(1, 1);
+  }
+}
+
+.s3-window-3:hover .s3-plushie-window-img {
+  animation-play-state: paused;
+  transform: translateX(-50%) scale(1.08);
+  filter: drop-shadow(0 0 22px rgba(242, 82, 135, 0.85)) drop-shadow(0 2px 2px rgba(42, 9, 73, 0.35));
+}
+
+.s3-toy-hotspot::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: calc(17% - 0.2vw);
+  width: 5vw;
+  height: 0.7vw;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(55, 12, 90, 0.45), transparent 70%);
+  pointer-events: none;
 }
 
 .s3-toy-glow-ring {
@@ -2347,14 +2471,37 @@ body.template-index {
 
   .psd-section-forest {
     aspect-ratio: auto;
+    height: auto;
     min-height: 720px;
-    padding: 20px 0;
+    padding: 20px 0 calc(20px + 12vw);
+    background: linear-gradient(180deg, #1a0d38 0%, #1a0d38 62%, #17294b 82%, #0c777c 100%);
+  }
+
+  /* The book needs a taller section here; keep the illustration at its
+     original width while moving a separate river strip to the actual edge. */
+  #s2-l-bg > img {
+    mask-image: linear-gradient(to bottom, #000 0%, #000 62%, transparent 78%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 62%, transparent 78%);
+  }
+
+  #s2-l-cat {
+    top: auto;
+    bottom: -2.4vw;
+  }
+
+  .s3-plushie-window-img {
+    bottom: 14%;
+  }
+
+  .s3-toy-hotspot::after {
+    bottom: calc(14% - 0.2vw);
   }
 
   .s2-book-stage {
     position: relative;
     left: auto;
     top: auto;
+    bottom: auto;
     width: 92%;
     max-width: 520px;
     margin: 0 auto;

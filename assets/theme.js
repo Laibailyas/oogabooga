@@ -81,7 +81,7 @@
       const isCentered = s1Centered.includes(el.id);
 
       // Dedicated 3D pivot physics for Section 2 Ladder:
-      // Bottom foot (28% 90%) stays 100% pinned in river water, top monkey side falls backwards & down
+      // The submerged rail pivots over the stationary river strip at 28% 86%.
       if (el === s2LCat) {
         const baseRotX = el._rotX || 0;
         const baseRotZ = el._rotZ || 0;
@@ -155,9 +155,8 @@
           // Layers animate smoothly on scroll with progressive depth:
           applyLayer(s2LBg, normalized * -10);    // Layer 1: Sky & deep forest backdrop (slowest)
           applyLayer(s2LTrees, normalized * -6);   // Layer 2: Main pink trees (midground)
-          // Layer 3: Characters dynamically move UPWARDS from exact position when scrolling
-          const charsScrollY = normalized > 0 ? (normalized * 12) : (normalized * 42);
-          applyLayer(s2LChars, charsScrollY);
+          // Layer 3: Characters stay locked to the tree branches on scroll
+          applyLayer(s2LChars, normalized * -6);
 
           // Layer 4 (s2LCat): Ladder bottom stays fixed in river, top monkey side falls backwards & down!
           // Normalized decreases as user scrolls down: 1 (entering) -> 0 (center) -> -1 (exiting)
@@ -215,7 +214,7 @@
       attachMouseParallax(s2, [
         { el: s2LBg,    xFactor: -10, yFactor: -6 },
         { el: s2LTrees, xFactor: -10, yFactor: -6 },
-        { el: s2LChars, xFactor: -6,  yFactor: -4 },
+        { el: s2LChars, xFactor: -10, yFactor: -6 },
         { el: s2LCat,   xFactor: 12,  yFactor: 8  }
       ]);
     }
@@ -238,19 +237,28 @@
 
     // Depth configuration according to Master Prompt specifications:
     const layers = [
-      { el: l1, speed: 0.05, mouseX: -8  },
-      { el: l2, speed: 0.10, mouseX: -12 },
+      { el: l1, speed: 0,    mouseX: -8  },
+      { el: l2, speed: 0,    mouseX: -12 },
       { el: l3, speed: 0.25, mouseX: 14  },
       { el: winContainer, speed: 0.25, mouseX: 14 },
       { el: l4, speed: 0.35, mouseX: 20  },
       { el: l5, speed: 0.40, mouseX: 24  },
       { el: l6, speed: 0.45, mouseX: 28  },
       { el: l7, speed: 0.70, mouseX: 36  },
-      { el: l8, speed: 0.85, mouseX: 44  },
+      { el: l8, speed: 0.25, mouseX: 14  },
     ];
 
     // Responsive travel displacement: scales down on mobile/tablet to eliminate overflow
     const getMaxDelta = () => Math.min(window.innerWidth * 0.08, 90);
+
+    // Keep the grass and the cropped foreground illustration covering the
+    // bottom edge when parallax would otherwise pull them above the reviews.
+    function getLayerY(el, y) {
+      if (el === l7 || el === l8) {
+        return Math.max(y, s3.clientHeight - el.offsetTop - el.offsetHeight + 2);
+      }
+      return y;
+    }
 
     // 1. GSAP ScrollTrigger Integration
     if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
@@ -277,15 +285,15 @@
       // At scroll progress = 0.5 (center of viewport), all layers are exactly at y = 0 (native PSD coords).
       // Entering from bottom: y = +speed * maxDelta; exiting through top: y = -speed * maxDelta.
       layers.forEach(({ el, speed }) => {
-        if (!el) return;
+        if (!el || speed === 0) return;
         tl.fromTo(
           el,
           {
-            y: () => speed * getMaxDelta(),
+            y: () => getLayerY(el, speed * getMaxDelta()),
             force3D: true
           },
           {
-            y: () => -speed * getMaxDelta(),
+            y: () => getLayerY(el, -speed * getMaxDelta()),
             ease: 'none',
             force3D: true
           },
@@ -303,8 +311,9 @@
           const normalized = s3Center / (vh / 2);
           const maxDelta = getMaxDelta();
           layers.forEach(({ el, speed }) => {
-            if (!el) return;
-            const sy = normalized * speed * maxDelta;
+            if (!el || speed === 0) return;
+            const sy = getLayerY(el, normalized * speed * maxDelta);
+            el._scrollY = sy;
             el.style.transform = `translate3d(0, ${sy}px, 0)`;
           });
         }

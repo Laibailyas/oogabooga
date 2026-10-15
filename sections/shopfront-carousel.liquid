@@ -12,6 +12,12 @@
   <!-- LAYER 3: Storefront Arches & Windows (Striped awnings, curtains, and display areas) -->
   <div class="layer s3-layer" id="s3-l3-windows">
     <img src="{{ 'images/parallax/section 3/Ooga.Booga.Website.Homepag 03.png' | asset_url }}" alt="Shop Windows & Striped Awnings">
+    <!-- Sunlight and its awning cover share the window's movement. -->
+    <div class="layer s3-layer" id="s3-l-rays" aria-hidden="true">
+      <img src="{{ 'images/parallax/section 3/Ooga.Booga.Website.Homepag 08.rays.png' | asset_url }}" alt="">
+    </div>
+    <img class="s3-awning-occluder" src="{{ 'images/parallax/section 3/Ooga.Booga.Website.Homepag 03.png' | asset_url }}" alt="" aria-hidden="true">
+    <img class="s3-planter-occluder" src="{{ 'images/parallax/section 3/Ooga.Booga.Website.Homepag 03.png' | asset_url }}" alt="" aria-hidden="true">
   </div>
 
   <!-- LAYER 4: Architectural Columns / Pillars (Vertical structural pillars) -->
@@ -36,7 +42,7 @@
 
   <!-- LAYER 8: Illustrated Characters (Girl with pet, Boy, Green mascot waving) -->
   <div class="layer s3-layer s3-living-chars" id="s3-l8-characters">
-    <img src="{{ 'images/parallax/section 3/Ooga.Booga.Website.Homepag 08.png' | asset_url }}" alt="Suburban Adventure Characters">
+    <img src="{{ 'images/parallax/section 3/Ooga.Booga.Website.Homepag 08.characters.png' | asset_url }}" alt="Suburban Adventure Characters">
   </div>
 
   <!-- Interactive Window Displays (Windows 1, 2, 3) -->
@@ -73,10 +79,17 @@
       </div>
     </div>
 
+
     <!-- Window 3: Clickable Plushie Toy on Pedestal -->
     <div class="s3-window-display s3-window-3" id="plushieShopZone" role="button" tabindex="0" aria-label="Official Ooga Booga Plushie Toy - Click to View!">
       <span class="s3-window-badge s3-plushie-badge">Plushie</span>
-      <div class="s3-toy-hotspot"></div>
+      <div class="s3-toy-hotspot">
+        <img
+          src="{{ 'images/shop/plushie_seated.png' | asset_url }}"
+          alt="Official Ooga Booga Plushie Toy"
+          class="s3-plushie-window-img"
+        >
+      </div>
     </div>
   </div>
 
