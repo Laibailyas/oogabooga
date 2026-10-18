@@ -4133,7 +4133,8 @@ body.template-index {
 
 /* Homepage phone layout. These classes are set only for touch phone viewports. */
 .home-menu-toggle,
-.home-orientation-hint {
+.home-orientation-hint,
+.home-landscape-exit-item[hidden] {
   display: none;
 }
 
@@ -4220,33 +4221,75 @@ body.template-index.home-phone {
   font-size: 16px;
   padding: 6px 10px;
 }
-.template-index.home-phone .home-orientation-hint:not([hidden]) {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  position: fixed;
-  bottom: max(12px, env(safe-area-inset-bottom, 0px));
-  left: var(--home-safe-left);
-  right: var(--home-safe-right);
-  z-index: 90;
-  padding: 8px 10px 8px 14px;
-  border: 1px solid #62eee0;
-  border-radius: 16px;
-  color: #fff;
-  background: rgba(35,15,51,.97);
-  box-shadow: 0 8px 28px rgba(0,0,0,.4);
-  font: 600 14px/1.4 var(--font-fun);
-}
-.template-index.home-phone .home-orientation-hint button {
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0;
+.template-index.home-phone .home-landscape-exit {
+  width: 100%;
   border: 0;
-  border-radius: 50%;
-  background: #4d2863;
-  color: #fff;
+  background: transparent;
+  color: #6eefe2;
+  font-family: inherit;
+  font-weight: 700;
+  text-align: left;
   cursor: pointer;
 }
+.template-index.home-phone .home-orientation-hint[open] {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(340px, calc(100% - var(--home-safe-left) - var(--home-safe-right) - 8px));
+  height: fit-content;
+  max-height: calc(100dvh - max(16px, env(safe-area-inset-top, 0px)) - max(16px, env(safe-area-inset-bottom, 0px)));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 24px;
+  border: 1px solid #62eee0;
+  border-radius: 20px;
+  color: #fff;
+  background: #230f33;
+  box-shadow: 0 16px 48px rgba(0,0,0,.55);
+  text-align: center;
+  font: 600 16px/1.5 var(--font-fun);
+}
+.template-index .home-orientation-hint::backdrop {
+  background: rgba(8,3,17,.7);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+/* Cover the page while fullscreen moves the root above the modal's top layer. */
+html.home-orientation-open.home-orientation-handoff:fullscreen::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  background: rgba(8,3,17,.7);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.template-index .home-orientation-hint h2 {
+  color: #6eefe2;
+  font: 700 21px/1.25 var(--font-fun);
+}
+.template-index.home-phone .home-orientation-hint button {
+  min-width: 112px;
+  min-height: 44px;
+  align-self: center;
+  padding: 8px 24px;
+  border: 1px solid rgba(255,255,255,.5);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff4081, #b32579);
+  color: #fff;
+  font: 700 16px/1.5 var(--font-fun);
+  cursor: pointer;
+}
+.template-index.home-phone .home-orientation-hint button:disabled {
+  cursor: wait;
+  opacity: .8;
+}
+html.home-orientation-open,
+html.home-orientation-open body { overflow-y: hidden; }
 
 /* Keep the purchase content inside its own controls at phone widths. */
 .template-index.home-phone .s2-book-buy-card {
@@ -4362,7 +4405,7 @@ body.template-index.home-phone {
   position: absolute;
   left: 37.25vw;
   top: var(--book-sidebar-top, 13.215vw);
-  width: min(50vw, 420px);
+  width: clamp(284px, 44vw, 370px);
   max-width: calc(56.5vw - var(--home-safe-right));
   z-index: 1;
 }

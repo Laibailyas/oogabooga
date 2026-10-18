@@ -43,6 +43,7 @@
           <li><a href="product.html" class="nav-link nav-link-product">Book</a></li>
           <li><a href="tshirt.html" class="nav-link">T-Shirts</a></li>
           <li><a href="plushie.html" class="nav-link">Plushie</a></li>
+          <li class="home-landscape-exit-item" hidden><button type="button" class="nav-link home-landscape-exit">Exit landscape</button></li>
         </ul>
       </nav>
 
@@ -57,10 +58,11 @@
       </div>
     </div>
   </header>
-  <aside class="home-orientation-hint" id="homeOrientationHint" hidden aria-label="Viewing suggestion">
-    <p role="status">Rotate your phone for the best viewing experience.</p>
-    <button type="button" aria-label="Dismiss rotation suggestion">✕</button>
-  </aside>
+  <dialog class="home-orientation-hint" id="homeOrientationHint" hidden aria-labelledby="homeOrientationTitle" aria-describedby="homeOrientationMessage">
+    <h2 id="homeOrientationTitle">Best viewed in landscape</h2>
+    <p id="homeOrientationMessage" aria-live="polite" aria-atomic="true">Rotate your phone for the best viewing experience.</p>
+    <button type="button" autofocus>OK</button>
+  </dialog>
 
   <!-- TRUST & REVIEWS TOP BAR (Continuous Single-Line Infinite Marquee) -->
   <div class="trust-top-bar" id="reviews-trust-bar">

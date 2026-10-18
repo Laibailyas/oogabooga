@@ -13,6 +13,9 @@
         <li><a href="/products/ooga-booga-hardcover" class="nav-link nav-link-product">Book</a></li>
         <li><a href="/pages/t-shirts" class="nav-link">T-Shirts</a></li>
         <li><a href="/pages/plushie" class="nav-link">Plushie</a></li>
+        {% if template.name == 'index' %}
+          <li class="home-landscape-exit-item" hidden><button type="button" class="nav-link home-landscape-exit">Exit landscape</button></li>
+        {% endif %}
       </ul>
     </nav>
 
@@ -31,10 +34,11 @@
   </div>
 </header>
 {% if template.name == 'index' %}
-  <aside class="home-orientation-hint" id="homeOrientationHint" hidden aria-label="Viewing suggestion">
-    <p role="status">Rotate your phone for the best viewing experience.</p>
-    <button type="button" aria-label="Dismiss rotation suggestion">✕</button>
-  </aside>
+  <dialog class="home-orientation-hint" id="homeOrientationHint" hidden aria-labelledby="homeOrientationTitle" aria-describedby="homeOrientationMessage">
+    <h2 id="homeOrientationTitle">Best viewed in landscape</h2>
+    <p id="homeOrientationMessage" aria-live="polite" aria-atomic="true">Rotate your phone for the best viewing experience.</p>
+    <button type="button" autofocus>OK</button>
+  </dialog>
 {% endif %}
 
 {% schema %}
