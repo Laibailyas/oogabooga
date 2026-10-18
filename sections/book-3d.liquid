@@ -33,13 +33,14 @@
     <img src="{{ 'parallax/section 2/Ooga.Booga.Website.Homepag 4.png' | asset_img_url: 'master' }}" alt="Cat on Pink Ladder into River">
   </div>
 
-  <!-- Left Side: 3D Interactive Rotating Book GLB Stage -->
+  <!-- Book and its controls share one desktop view. -->
   <div class="s2-book-stage">
     <!-- WebGL Canvas for 3D Book -->
     <div class="s2-book-canvas-wrapper">
       <div class="s2-book-canvas-container" id="book3dContainer" data-model-url="{{ 'models/Ooga_Booga_Hardcover_Render.glb' | asset_url }}"></div>
     </div>
 
+    <div class="s2-book-sidebar">
     <!-- Quick Angle View Buttons -->
     <div class="s2-book-controls-row">
       <button type="button" class="btn-3d-ctrl" id="btn-view-cover">Front Cover</button>
@@ -85,6 +86,7 @@
           🔍 Look Inside
         </a>
       </div>
+    </div>
     </div>
   </div>
 </section>

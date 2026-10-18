@@ -6,6 +6,75 @@
 (function () {
   'use strict';
 
+  // One set of phone conditions for the header, scenes, viewer and video.
+  const homePortraitQuery = window.matchMedia('(hover: none) and (pointer: coarse) and (max-width: 600px) and (orientation: portrait)');
+  const homeLandscapeQuery = window.matchMedia('(hover: none) and (pointer: coarse) and (max-width: 1024px) and (max-height: 600px) and (orientation: landscape)');
+  const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const isHomePhone = () => document.body.classList.contains('template-index') && (homePortraitQuery.matches || homeLandscapeQuery.matches);
+  const isHomeLandscape = () => isHomePhone() && homeLandscapeQuery.matches;
+  const reduceHomeMotion = () => isHomePhone() && reducedMotionQuery.matches;
+
+  function initHomepagePhoneLayout() {
+    if (!document.body.classList.contains('template-index')) return;
+    const header = document.getElementById('SiteHeader');
+    const menu = header && header.querySelector('.home-menu-toggle');
+    const nav = document.getElementById('homeMobileNav');
+    const hint = document.getElementById('homeOrientationHint');
+    const dismissalKey = 'ooga.home.orientationHintDismissed';
+    let dismissed = false;
+    let scheduled = false;
+    let lastMode = '';
+    try { dismissed = sessionStorage.getItem(dismissalKey) === '1'; } catch (_) { /* Storage is optional. */ }
+
+    function closeMenu(returnFocus = false) {
+      document.body.classList.remove('home-menu-open');
+      if (menu) menu.setAttribute('aria-expanded', 'false');
+      if (returnFocus && menu) menu.focus();
+    }
+    function updateLayout() {
+      scheduled = false;
+      const phone = isHomePhone();
+      const landscape = isHomeLandscape();
+      const mode = phone ? (landscape ? 'landscape' : 'portrait') : 'desktop';
+      document.body.classList.toggle('home-phone', phone);
+      document.body.classList.toggle('home-landscape', landscape);
+      document.documentElement.classList.toggle('home-phone-page', phone);
+      if (hint) hint.hidden = !phone || landscape || dismissed;
+      if (mode !== lastMode) {
+        closeMenu();
+        lastMode = mode;
+      }
+      window.dispatchEvent(new Event('homepage:layout'));
+      if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+    }
+    function scheduleLayout() {
+      if (!scheduled) { scheduled = true; requestAnimationFrame(updateLayout); }
+    }
+    if (menu && nav) {
+      menu.addEventListener('click', () => {
+        const open = !document.body.classList.contains('home-menu-open');
+        document.body.classList.toggle('home-menu-open', open);
+        menu.setAttribute('aria-expanded', String(open));
+      });
+      nav.addEventListener('click', e => { if (e.target.closest('a')) closeMenu(); });
+      document.addEventListener('click', e => { if (!header.contains(e.target)) closeMenu(); });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && document.body.classList.contains('home-menu-open')) closeMenu(true);
+      });
+    }
+    if (hint) hint.querySelector('button').addEventListener('click', () => {
+      dismissed = true;
+      hint.hidden = true;
+      try { sessionStorage.setItem(dismissalKey, '1'); } catch (_) { /* Keep the in-memory dismissal. */ }
+    });
+    updateLayout();
+    homePortraitQuery.addEventListener('change', scheduleLayout);
+    homeLandscapeQuery.addEventListener('change', scheduleLayout);
+    reducedMotionQuery.addEventListener('change', scheduleLayout);
+    window.addEventListener('resize', scheduleLayout, { passive: true });
+    if (document.fonts) document.fonts.ready.then(scheduleLayout);
+  }
+
   // 1. STATE & CART MANAGEMENT
   const state = {
     cart: [
@@ -139,8 +208,9 @@
           const sy = Math.max(0, -rect1.top);
           s1Layers.forEach(({ el, speed, isFrame }) => {
             if (!el) return;
-            const ty = sy * speed;
-            const sc = isFrame ? (1 + Math.min(0.04, sy * 0.000075)) : 1;
+            const mobileScale = isHomePhone() ? Math.min(1, s1.clientWidth / 1280) : 1;
+            const ty = reduceHomeMotion() ? 0 : sy * speed * mobileScale;
+            const sc = !reduceHomeMotion() && isFrame ? (1 + Math.min(0.04, sy * 0.000075 * mobileScale)) : 1;
             applyLayer(el, ty, sc);
           });
         }
@@ -151,7 +221,8 @@
         const rect2 = s2.getBoundingClientRect();
         if (rect2.bottom > 0 && rect2.top < vh) {
           const s2Center = (rect2.top + rect2.height / 2) - (vh / 2);
-          const normalized = s2Center / (vh / 2);
+          const rawNormalized = s2Center / (vh / 2);
+          const normalized = reduceHomeMotion() ? 0 : rawNormalized * (isHomePhone() ? Math.min(1, s2.clientWidth / 1280) : 1);
           // Layers animate smoothly on scroll with progressive depth:
           applyLayer(s2LBg, normalized * -10);    // Layer 1: Sky & deep forest backdrop (slowest)
           applyLayer(s2LTrees, normalized * -6);   // Layer 2: Main pink trees (midground)
@@ -160,7 +231,7 @@
 
           // Layer 4 (s2LCat): Ladder bottom stays fixed in river, top monkey side falls backwards & down!
           // Normalized decreases as user scrolls down: 1 (entering) -> 0 (center) -> -1 (exiting)
-          const fallProgress = Math.max(0, Math.min(1.4, (1.0 - normalized) / 1.5));
+          const fallProgress = reduceHomeMotion() ? 0 : Math.max(0, Math.min(1.4, (1.0 - normalized) / 1.5));
           s2LCat._rotX = fallProgress * -15; // Tilts backwards into depth by up to -21deg
           s2LCat._rotZ = fallProgress * 5;   // Top tilts downwards and to the side by up to 7deg
           updateLayerTransform(s2LCat);
@@ -169,13 +240,15 @@
     }
 
     window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('homepage:layout', onScroll);
     updateParallax();
 
     // Desktop Mouse Move Dynamic 3D Depth (Cinema & Forest)
-    if (window.innerWidth > 992) {
+    if (window.innerWidth > 992 && !isHomePhone()) {
       function attachMouseParallax(section, layers) {
         if (!section) return;
         section.addEventListener('mousemove', function (e) {
+          if (isHomePhone()) return;
           const rect = section.getBoundingClientRect();
           const relX = (e.clientX - rect.left) / rect.width - 0.5;
           const relY = (e.clientY - rect.top) / rect.height - 0.5;
@@ -235,24 +308,24 @@
     const l8 = document.getElementById('s3-l8-characters');
     const winContainer = s3.querySelector('.s3-windows-container');
 
-    // Depth configuration according to Master Prompt specifications:
+    // Connected architecture stays registered to the river and pavement.
+    // Only the foreground illustration has a small independent depth movement.
     const layers = [
-      { el: l1, speed: 0,    mouseX: -8  },
-      { el: l2, speed: 0,    mouseX: -12 },
-      { el: l3, speed: 0.25, mouseX: 14  },
-      { el: winContainer, speed: 0.25, mouseX: 14 },
-      { el: l4, speed: 0.35, mouseX: 20  },
-      { el: l5, speed: 0.40, mouseX: 24  },
-      { el: l6, speed: 0.45, mouseX: 28  },
-      { el: l7, speed: 0.70, mouseX: 36  },
-      { el: l8, speed: 0.25, mouseX: 14  },
+      { el: l1, speed: 0,    mouseX: 0 },
+      { el: l2, speed: 0,    mouseX: 0 },
+      { el: l3, speed: 0,    mouseX: 0 },
+      { el: winContainer, speed: 0, mouseX: 0 },
+      { el: l4, speed: 0,    mouseX: 0 },
+      { el: l5, speed: 0,    mouseX: 0 },
+      { el: l6, speed: 0,    mouseX: 0 },
+      { el: l7, speed: 0,    mouseX: 0 },
+      { el: l8, speed: 0.04, mouseX: 8 },
     ];
 
     // Responsive travel displacement: scales down on mobile/tablet to eliminate overflow
-    const getMaxDelta = () => Math.min(window.innerWidth * 0.08, 90);
+    const getMaxDelta = () => reduceHomeMotion() ? 0 : Math.min(window.innerWidth * 0.08, 90);
 
-    // Keep the grass and the cropped foreground illustration covering the
-    // bottom edge when parallax would otherwise pull them above the reviews.
+    // Keep the foreground covering the bottom edge above the reviews.
     function getLayerY(el, y) {
       if (el === l7 || el === l8) {
         return Math.max(y, s3.clientHeight - el.offsetTop - el.offsetHeight + 2);
@@ -327,17 +400,19 @@
           ticking = true;
         }
       }, { passive: true });
+      window.addEventListener('homepage:layout', updateS3Fallback);
       updateS3Fallback();
     }
 
     // 2. Desktop Mouse Parallax (Dynamic 3D Depth on Cursor Move)
-    if (window.innerWidth > 992) {
+    if (window.innerWidth > 992 && !isHomePhone()) {
       s3.addEventListener('mousemove', function (e) {
+        if (isHomePhone()) return;
         const rect = s3.getBoundingClientRect();
         const relX = (e.clientX - rect.left) / rect.width - 0.5;
 
         layers.forEach(({ el, mouseX }) => {
-          if (!el) return;
+          if (!el || !mouseX) return;
           if (typeof gsap !== 'undefined') {
             gsap.to(el, {
               x: relX * mouseX,
@@ -353,8 +428,8 @@
       });
 
       s3.addEventListener('mouseleave', function () {
-        layers.forEach(({ el }) => {
-          if (!el) return;
+        layers.forEach(({ el, mouseX }) => {
+          if (!el || !mouseX) return;
           if (typeof gsap !== 'undefined') {
             gsap.to(el, {
               x: 0,
@@ -365,6 +440,53 @@
           }
         });
       });
+    }
+  }
+
+  // Keep the purchase controls below the illustrated tree characters.
+  function initBookSidebarLayout() {
+    const section = document.getElementById('enchanted-forest');
+    const stage = section && section.querySelector('.s2-book-stage');
+    const sidebar = stage && stage.querySelector('.s2-book-sidebar');
+    const characters = document.getElementById('s2-l-chars');
+    if (!stage || !sidebar || !characters) return;
+
+    const card = sidebar.querySelector('.s2-book-buy-card');
+    const desktop = window.matchMedia('(min-width: 901px)');
+    let scheduled = false;
+
+    function layout() {
+      scheduled = false;
+      if (!desktop.matches && !isHomeLandscape()) {
+        stage.style.removeProperty('--book-sidebar-top');
+        return;
+      }
+
+      // Match the reference card's top edge, with the view buttons just above it.
+      const controlsHeight = sidebar.offsetHeight - (card ? card.offsetHeight : 0);
+      const preferredTop = isHomeLandscape() ? section.clientWidth * 0.26 : section.clientWidth * 0.353125 - controlsHeight;
+      const minimumTop = characters.offsetTop + characters.offsetHeight + (isHomeLandscape() ? 12 : 24);
+      const sectionTop = Math.max(minimumTop, preferredTop);
+      const value = `${sectionTop - stage.offsetTop}px`;
+      if (stage.style.getPropertyValue('--book-sidebar-top') !== value) {
+        stage.style.setProperty('--book-sidebar-top', value);
+      }
+    }
+
+    function scheduleLayout() {
+      if (scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(layout);
+    }
+
+    layout();
+    window.addEventListener('resize', scheduleLayout, { passive: true });
+    window.addEventListener('homepage:layout', scheduleLayout);
+    if (document.fonts) document.fonts.ready.then(scheduleLayout);
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(scheduleLayout);
+      observer.observe(section);
+      observer.observe(sidebar);
     }
   }
 
@@ -389,15 +511,45 @@
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
     camera.position.set(0, 0, 2.61);
     camera.lookAt(0, 0, 0);
+    const isHomepageBook = !!container.closest('.s2-book-stage');
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.98; // Natural, accurate exposure (eliminates oversaturation/blowout)
     container.appendChild(renderer.domElement);
+
+    function resizeBookViewer(baseWidth, baseHeight) {
+      if (!baseWidth || !baseHeight) return;
+
+      const expanded = isHomepageBook && (isHomeLandscape() || (!isHomePhone() && window.innerWidth > 900));
+      const paddingX = expanded ? Math.ceil(baseWidth * 0.10) : 0;
+      const paddingY = expanded ? Math.ceil(baseHeight * 0.20) : 0;
+      const renderWidth = baseWidth + 2 * paddingX;
+      const renderHeight = baseHeight + 2 * paddingY;
+
+      camera.aspect = renderWidth / renderHeight;
+      // Preserve the original pixels per world unit inside the larger canvas.
+      camera.zoom = (expanded ? 1.12 : 1) * baseHeight / renderHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(renderWidth, renderHeight);
+
+      const canvas = renderer.domElement;
+      if (expanded) {
+        canvas.style.position = 'absolute';
+        canvas.style.left = `${-paddingX}px`;
+        canvas.style.top = `${-paddingY}px`;
+        canvas.style.display = 'block';
+      } else {
+        canvas.style.removeProperty('position');
+        canvas.style.removeProperty('left');
+        canvas.style.removeProperty('top');
+        canvas.style.removeProperty('display');
+      }
+    }
+    resizeBookViewer(width, height);
 
     // Balanced Natural Lighting (soft, rich, authentic colors without harsh oversaturation)
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
@@ -500,6 +652,7 @@
 
     // Mouse & Touch Drag Controls
     container.addEventListener('mousedown', function (e) {
+      if (isHomepageBook && isHomePhone()) return;
       isDragging = true;
       autoRotate = false;
       isTweening = false;
@@ -518,6 +671,7 @@
     });
 
     container.addEventListener('mousemove', function (e) {
+      if (isHomepageBook && isHomePhone()) return;
       if (!isDragging || !pivotGroup) return;
       const deltaX = e.clientX - prevMouseX;
       const deltaY = e.clientY - prevMouseY;
@@ -530,6 +684,7 @@
 
     // Touch Support for Mobile
     container.addEventListener('touchstart', function (e) {
+      if (isHomepageBook && isHomePhone()) return;
       if (e.touches.length === 1) {
         isDragging = true;
         autoRotate = false;
@@ -540,6 +695,7 @@
     }, { passive: true });
 
     container.addEventListener('touchmove', function (e) {
+      if (isHomepageBook && isHomePhone()) return;
       if (!isDragging || !pivotGroup || e.touches.length !== 1) return;
       const deltaX = e.touches[0].clientX - prevMouseX;
       const deltaY = e.touches[0].clientY - prevMouseY;
@@ -550,6 +706,7 @@
     }, { passive: true });
 
     container.addEventListener('touchend', function () {
+      if (isHomepageBook && isHomePhone()) return;
       if (isDragging) {
         isDragging = false;
         setTimeout(() => { 
@@ -557,6 +714,54 @@
         }, 2500);
       }
     });
+
+    // Horizontal phone drags rotate the book; vertical gestures remain page scrolls.
+    let phonePointer = null;
+    let phoneStartX = 0;
+    let phoneStartY = 0;
+    let phoneDragging = false;
+    let resumeTimer;
+    function finishPhoneDrag() {
+      if (phonePointer === null) return;
+      const pointer = phonePointer;
+      phonePointer = null;
+      if (container.hasPointerCapture(pointer)) container.releasePointerCapture(pointer);
+      phoneDragging = false;
+      isDragging = false;
+      clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(() => { if (!isDragging && !isTweening) autoRotate = true; }, 2500);
+    }
+    if (isHomepageBook) {
+      container.addEventListener('pointerdown', e => {
+        if (!isHomePhone()) return;
+        if (!e.isPrimary || phonePointer !== null) { finishPhoneDrag(); return; }
+        phonePointer = e.pointerId;
+        phoneStartX = prevMouseX = e.clientX;
+        phoneStartY = e.clientY;
+      });
+      container.addEventListener('pointermove', e => {
+        if (e.pointerId !== phonePointer || !isHomePhone()) return;
+        const dx = e.clientX - phoneStartX;
+        const dy = e.clientY - phoneStartY;
+        if (!phoneDragging) {
+          if (Math.abs(dy) > 6 && Math.abs(dy) >= Math.abs(dx)) { finishPhoneDrag(); return; }
+          if (Math.abs(dx) <= 6 || Math.abs(dx) <= Math.abs(dy)) return;
+          phoneDragging = isDragging = true;
+          autoRotate = isTweening = false;
+          clearTimeout(resumeTimer);
+          container.setPointerCapture(e.pointerId);
+        }
+        pivotGroup.rotation.y += (e.clientX - prevMouseX) * 0.015;
+        prevMouseX = e.clientX;
+      });
+      container.addEventListener('pointerup', finishPhoneDrag);
+      container.addEventListener('pointercancel', finishPhoneDrag);
+      container.addEventListener('lostpointercapture', e => {
+        // Ignore the canvas releasing its implicit capture when the wrapper takes over.
+        if (e.target === container) finishPhoneDrag();
+      });
+      window.addEventListener('homepage:layout', finishPhoneDrag);
+    }
 
     // Preset Angle Buttons
     const btnCover = document.getElementById('btn-view-cover');
@@ -622,7 +827,10 @@
       const delta = clock.getDelta();
 
       if (pivotGroup) {
-        if (isTweening) {
+        if (isTweening && reduceHomeMotion() && isHomepageBook) {
+          pivotGroup.rotation.set(targetRotation.x, targetRotation.y, targetRotation.z);
+          isTweening = false;
+        } else if (isTweening) {
           pivotGroup.rotation.x += (targetRotation.x - pivotGroup.rotation.x) * 0.12;
           pivotGroup.rotation.y += (targetRotation.y - pivotGroup.rotation.y) * 0.12;
           pivotGroup.rotation.z += (targetRotation.z - pivotGroup.rotation.z) * 0.12;
@@ -634,13 +842,13 @@
             pivotGroup.rotation.set(targetRotation.x, targetRotation.y, targetRotation.z);
             isTweening = false;
           }
-        } else if (autoRotate) {
+        } else if (autoRotate && !(isHomepageBook && reduceHomeMotion())) {
           // Continuous 360 degree smooth rotation while standing upright in exact center
           pivotGroup.rotation.y += delta * 0.4;
         }
 
         // Subtle floating bobbing centered at Y = 0
-        pivotGroup.position.y = Math.sin(clock.getElapsedTime() * 1.5) * 0.025;
+        pivotGroup.position.y = isHomepageBook && reduceHomeMotion() ? 0 : Math.sin(clock.getElapsedTime() * 1.5) * 0.025;
       }
 
       renderer.render(scene, camera);
@@ -649,13 +857,21 @@
 
     // Resize Handler
     window.addEventListener('resize', function () {
-      if (!container) return;
-      const newW = container.clientWidth;
-      const newH = container.clientHeight;
-      camera.aspect = newW / newH;
-      camera.updateProjectionMatrix();
-      renderer.setSize(newW, newH);
+      resizeBookViewer(container.clientWidth, container.clientHeight);
     });
+    if (isHomepageBook) {
+      let resizeScheduled = false;
+      function scheduleViewerResize() {
+        if (resizeScheduled) return;
+        resizeScheduled = true;
+        requestAnimationFrame(() => {
+          resizeScheduled = false;
+          resizeBookViewer(container.clientWidth, container.clientHeight);
+        });
+      }
+      window.addEventListener('homepage:layout', scheduleViewerResize);
+      if (typeof ResizeObserver !== 'undefined') new ResizeObserver(scheduleViewerResize).observe(container);
+    }
   }
 
   // 4. LEGACY VILLAGE TRACK CAROUSEL (IF PRESENT)
@@ -696,7 +912,7 @@
   function initPlushieInteraction() {
     const plushieZone = document.getElementById('plushieShopZone');
     const plushieModal = document.getElementById('plushieModal');
-    if (!plushieZone || !plushieModal) return;
+    if (!plushieZone || plushieZone.matches('a[href]') || !plushieModal) return;
 
     plushieZone.addEventListener('click', function () {
       playCartoonPop(660);
@@ -733,21 +949,63 @@
     const muteBtn = document.getElementById('btnMuteVideo');
     if (!video) return;
 
-    // Mobile vs Desktop video source switch
-    if (window.innerWidth < 768 && video.dataset.portraitSrc) {
-      video.src = video.dataset.portraitSrc;
+    const landscapeSource = video.getAttribute('src');
+    const portraitSource = video.dataset.portraitSrc;
+    let switching = false;
+    let switchVersion = 0;
+    let pendingPosition = 0;
+    let playbackIntent = video.autoplay || !video.paused;
+    function updateButtons() {
+      if (playBtn) playBtn.textContent = video.paused ? '▶ PLAY' : '⏸ PAUSE';
+      if (muteBtn) muteBtn.textContent = video.muted ? '🔇 UNMUTE' : '🔊 MUTE';
     }
+    function tryPlay() {
+      const result = video.play();
+      if (result && result.catch) result.catch(() => { if (!switching) updateButtons(); });
+    }
+    function updateVideoSource() {
+      const phone = isHomePhone();
+      const source = phone ? (isHomeLandscape() ? landscapeSource : portraitSource || landscapeSource)
+        : (window.innerWidth < 768 && portraitSource ? portraitSource : landscapeSource);
+      if (!source || video.getAttribute('src') === source) return;
+      const position = switching ? pendingPosition : video.currentTime || 0;
+      const shouldPlay = switching || video.readyState === 0 ? playbackIntent : !video.paused;
+      playbackIntent = shouldPlay;
+      pendingPosition = position;
+      switching = true;
+      const version = ++switchVersion;
+      // Source changes resume explicitly so autoplay cannot override a user's pause.
+      video.autoplay = false;
+      video.src = source;
+      video.addEventListener('loadedmetadata', () => {
+        if (version !== switchVersion) return;
+        const end = Number.isFinite(video.duration) ? Math.max(0, video.duration - 0.1) : position;
+        try { video.currentTime = Math.min(position, end); } catch (_) { /* A stream may not be seekable. */ }
+        switching = false;
+        if (playbackIntent) tryPlay(); else video.pause();
+        updateButtons();
+      }, { once: true });
+      video.load();
+    }
+    // Keep the selected source in sync with orientation without resetting media controls.
+    updateVideoSource();
+    if (document.body.classList.contains('template-index')) window.addEventListener('homepage:layout', updateVideoSource);
+    video.addEventListener('play', () => { playbackIntent = true; updateButtons(); });
+    video.addEventListener('pause', () => { if (!switching) playbackIntent = false; updateButtons(); });
+    video.addEventListener('volumechange', updateButtons);
+    video.addEventListener('error', () => { switching = false; updateButtons(); });
 
     if (playBtn) {
       playBtn.addEventListener('click', function () {
         playCartoonPop(500);
         if (video.paused) {
-          video.play();
-          playBtn.innerHTML = '⏸ PAUSE';
+          playbackIntent = true;
+          tryPlay();
         } else {
+          playbackIntent = false;
           video.pause();
-          playBtn.innerHTML = '▶ PLAY';
         }
+        updateButtons();
       });
     }
 
@@ -755,7 +1013,7 @@
       muteBtn.addEventListener('click', function () {
         playCartoonPop(550);
         video.muted = !video.muted;
-        muteBtn.innerHTML = video.muted ? '🔇 UNMUTE' : '🔊 MUTE';
+        updateButtons();
       });
     }
   }
@@ -947,7 +1205,6 @@
     const window2 = document.getElementById('s3Window2');
     const prevBtn = document.getElementById('s3ShopPrev');
     const nextBtn = document.getElementById('s3ShopNext');
-    const notifyModal = document.getElementById('notifyModal');
 
     if (!window1 || !window2) return;
 
@@ -1007,27 +1264,13 @@
     let currentIndex = 0;
     let isTransitioning = false;
 
-    function openProductModal(prod) {
-      if (!notifyModal || !prod) return;
-      playCartoonPop(520);
-      const modalTag = document.getElementById('notifyModalTag');
-      const modalTitle = document.getElementById('notifyModalTitle');
-      const modalPrice = document.getElementById('notifyModalPrice');
-      const modalDesc = document.getElementById('notifyModalDesc');
-
-      if (modalTag) modalTag.textContent = prod.tag;
-      if (modalTitle) modalTitle.textContent = prod.title;
-      if (modalPrice) modalPrice.textContent = prod.price;
-      if (modalDesc) modalDesc.textContent = prod.desc;
-
-      notifyModal.classList.add('active');
-    }
-
     function updateWindow(windowNum, prod) {
       const badge = windowNum === 1 ? badge1 : badge2;
       const imgFront = windowNum === 1 ? imgFront1 : imgFront2;
       const imgBack = windowNum === 1 ? imgBack1 : imgBack2;
+      const link = (windowNum === 1 ? window1 : window2).querySelector('.s3-product-link');
 
+      if (link) link.setAttribute('aria-label', `View ${prod.title}`);
       if (badge) badge.textContent = prod.badge;
       if (imgFront) {
         imgFront.src = prod.frontImg;
@@ -1084,41 +1327,14 @@
         changeProducts('next');
       });
     }
-
-    // Clicking on window opens modal with currently displayed product
-    window1.addEventListener('click', (e) => {
-      if (e.target.closest('#s3ShopPrev') || e.target.closest('#s3ShopNext')) return;
-      const activeProd = products[currentIndex];
-      openProductModal(activeProd);
-    });
-
-    window2.addEventListener('click', (e) => {
-      if (e.target.closest('#s3ShopPrev') || e.target.closest('#s3ShopNext')) return;
-      const activeProd = products[(currentIndex + 1) % products.length];
-      openProductModal(activeProd);
-    });
-
-    window1.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        const activeProd = products[currentIndex];
-        openProductModal(activeProd);
-      }
-    });
-
-    window2.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        const activeProd = products[(currentIndex + 1) % products.length];
-        openProductModal(activeProd);
-      }
-    });
   }
 
   // DOM READY INITIALIZATION
   document.addEventListener('DOMContentLoaded', function () {
+    initHomepagePhoneLayout();
     initParallax();
     initSection3Parallax();
+    initBookSidebarLayout();
     initThreeJsBookViewer('book3dContainer', 'assets/models/Ooga_Booga_Hardcover_Render.glb');
     initShopfrontCarousel();
     initPlushieInteraction();

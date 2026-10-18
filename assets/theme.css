@@ -1620,9 +1620,7 @@ body.template-index {
   object-fit: contain;
 }
 
-/* LEFT SIDE: 3D Interactive Rotating Book GLB Stage
-   Positioned in the open clearing on the left (x: 0 → 46vw).
-   pointer-events: auto ensures ALL 3D drag / button / zoom interactions work freely. */
+/* Stacked book stage; the desktop composition is defined below. */
 .s2-book-stage {
   position: absolute;
   left: 4.5vw;
@@ -1636,6 +1634,14 @@ body.template-index {
   align-items: center;
   justify-content: space-between;
   padding: 4px;
+}
+
+.s2-book-sidebar {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .s2-book-badge {
@@ -2007,26 +2013,14 @@ body.template-index {
   z-index: 2;
 }
 #s3-l2-trim img {
-  transform-origin: 50% 0%;
-  animation: s3AwningFlutter 5.5s ease-in-out infinite alternate;
-  will-change: transform;
   mask-image: linear-gradient(to bottom, transparent 0%, transparent 30%, #000 39%);
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 30%, #000 39%);
-}
-
-@keyframes s3AwningFlutter {
-  0% {
-    transform: scaleY(1) skewX(-0.4deg);
-  }
-  100% {
-    transform: scaleY(1.012) skewX(0.4deg);
-  }
 }
 
 /* ── LAYER 3: Storefront Arches & Windows (Striped Awnings, Glass, Curtains) ──
    Awnings sit right under scalloped trim */
 #s3-l3-windows {
-  top: 2.80vw;
+  top: 5.60vw;
   height: 46.13vw;
   z-index: 3;
 }
@@ -2104,7 +2098,7 @@ body.template-index {
 /* ── LAYER 7: Sidewalk & Grass Ground (Tiled Pavement & Lower Grass Strip) ── */
 #s3-l7-ground {
   top: 53vw;
-  height: 18vw;
+  height: 16.60vw;
   z-index: 7;
 }
 
@@ -2141,6 +2135,7 @@ body.template-index {
 .s3-windows-container {
   position: absolute;
   inset: 0;
+  top: 2.80vw; /* Merchandise follows the lowered window artwork. */
   width: 100%;
   height: 61.60vw; /* Window coordinates stay independent of the extra foreground. */
   z-index: 15;
@@ -2173,7 +2168,30 @@ body.template-index {
 }
 
 .s3-window-3 {
-  left: 82.3%;
+  left: 82.85%;
+}
+
+.s3-product-link {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.s3-product-link > .s3-window-badge {
+  left: 0;
+  right: 0;
+  width: max-content;
+  margin-inline: auto;
+}
+
+.s3-product-link:focus-visible,
+.s3-window-3:focus-visible {
+  outline: 3px solid var(--color-yellow-accent);
+  outline-offset: 6px;
+  border-radius: 8px;
 }
 
 .s3-window-badge {
@@ -2285,7 +2303,7 @@ body.template-index {
 }
 
 .s3-window-3 {
-  left: 82.3%;
+  left: 82.85%;
   transition: transform var(--transition-bounce), filter 0.3s ease;
 }
 
@@ -2452,6 +2470,64 @@ body.template-index {
   .s2-book-buy-card {
     padding: 10px 14px;
     gap: 6px;
+  }
+}
+
+/* Keep the reference composition tied to the forest, independent of window height. */
+@media (min-width: 901px) {
+  .s2-book-stage {
+    left: 10.75vw;
+    top: 11.16vw;
+    bottom: auto;
+    width: 68.5vw;
+    max-width: none;
+    height: 45.25vw;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 36vw 32vw;
+    gap: 0.5vw;
+    align-items: stretch;
+  }
+
+  .s2-book-stage > .s2-book-canvas-wrapper {
+    min-height: 0;
+    overflow: visible;
+    z-index: 0;
+  }
+
+  .s2-book-stage .s2-book-canvas-container {
+    position: absolute;
+    inset: 0;
+  }
+
+  .s2-book-sidebar {
+    position: absolute;
+    /* Allow the book's widest drag pose a small gap before the card. */
+    left: calc(36vw + 16px);
+    top: var(--book-sidebar-top, calc(24.1525vw - 33px));
+    width: clamp(384px, 30vw, 576px);
+    margin-bottom: 0;
+    z-index: 1;
+  }
+
+  .s2-book-sidebar .s2-book-buy-card {
+    max-width: none;
+  }
+
+  .s2-book-sidebar .s2-card-actions {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .s2-book-sidebar .s2-buy-btn,
+  .s2-book-sidebar .s2-look-inside-btn {
+    padding-inline: 8px !important;
+  }
+
+  .s2-book-sidebar #btnAddToCart {
+    font-size: 0.875rem !important;
+    line-height: 27px;
+    padding-inline: 8px !important;
   }
 }
 
@@ -4054,6 +4130,256 @@ body.template-index {
     grid-template-columns: 1fr;
   }
 }
+
+/* Homepage phone layout. These classes are set only for touch phone viewports. */
+.home-menu-toggle,
+.home-orientation-hint {
+  display: none;
+}
+
+html.home-phone-page {
+  overflow-x: clip;
+  scroll-padding-top: 64px;
+}
+
+body.template-index.home-phone {
+  overflow-x: clip;
+  --home-safe-left: max(12px, env(safe-area-inset-left, 0px));
+  --home-safe-right: max(12px, env(safe-area-inset-right, 0px));
+}
+
+.template-index.home-phone .site-header {
+  padding: 4px var(--home-safe-right) 4px var(--home-safe-left);
+}
+.template-index.home-phone .header-container {
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  gap: 6px;
+  min-height: 40px;
+}
+.template-index.home-phone .logo-wrapper { min-width: 0; }
+.template-index.home-phone .brand-logo-text {
+  font-size: clamp(18px, 3.7vw, 24px);
+  gap: 4px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.template-index.home-phone .brand-logo-text span { letter-spacing: 0; }
+.template-index.home-phone .header-actions { gap: 6px; flex-shrink: 0; }
+.template-index.home-phone .btn-header-order,
+.template-index.home-phone .btn-header-cart,
+.template-index.home-phone .home-menu-toggle {
+  min-height: 36px;
+  padding: 6px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.template-index.home-phone .cart-btn-badge {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  min-width: 22px;
+}
+.template-index.home-phone .home-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,.45);
+  border-radius: 999px;
+  color: #fff;
+  background: #45205e;
+  font-family: var(--font-fun);
+  font-weight: 700;
+  cursor: pointer;
+}
+.template-index.home-phone .main-nav-wrapper {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: var(--home-safe-left);
+  right: var(--home-safe-right);
+  max-height: calc(100dvh - 64px);
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 0 0 16px 16px;
+  background: #261236;
+  box-shadow: 0 12px 28px rgba(0,0,0,.5);
+}
+.template-index.home-phone.home-menu-open .main-nav-wrapper { display: block; }
+.template-index.home-phone .main-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 12px;
+}
+.template-index.home-phone .main-nav .nav-link {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  font-size: 16px;
+  padding: 6px 10px;
+}
+.template-index.home-phone .home-orientation-hint:not([hidden]) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: fixed;
+  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  left: var(--home-safe-left);
+  right: var(--home-safe-right);
+  z-index: 90;
+  padding: 8px 10px 8px 14px;
+  border: 1px solid #62eee0;
+  border-radius: 16px;
+  color: #fff;
+  background: rgba(35,15,51,.97);
+  box-shadow: 0 8px 28px rgba(0,0,0,.4);
+  font: 600 14px/1.4 var(--font-fun);
+}
+.template-index.home-phone .home-orientation-hint button {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #4d2863;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Keep the purchase content inside its own controls at phone widths. */
+.template-index.home-phone .s2-book-buy-card {
+  padding: 8px;
+  gap: 6px;
+  border-radius: 16px;
+  transition-property: border-color, box-shadow;
+}
+.template-index.home-phone .s2-card-title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 6px;
+}
+.template-index.home-phone .s2-card-title-row > div:first-child { display: contents; }
+.template-index.home-phone .s2-card-title { grid-column: 1; grid-row: 1; font-size: 16px; }
+.template-index.home-phone .s2-card-price { grid-column: 2; grid-row: 1; font-size: 18px; }
+.template-index.home-phone .s2-card-subtitle {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  font-size: 11px;
+  line-height: 1.2;
+  margin-top: 0;
+}
+.template-index.home-phone .s2-book-controls-row { gap: 4px; }
+.template-index.home-phone .btn-3d-ctrl {
+  min-height: 32px;
+  padding: 4px 6px;
+  font-size: 11px;
+  letter-spacing: 0;
+}
+.template-index.home-phone .s2-variant-selector { gap: 4px; }
+.template-index.home-phone .s2-variant-selector .variant-card {
+  min-width: 0;
+  min-height: 44px;
+  padding: 5px 4px;
+  gap: 1px;
+  border-radius: 12px;
+}
+.template-index.home-phone .s2-variant-name { font-size: 12px; }
+.template-index.home-phone .s2-variant-subtext { font-size: 10.5px; }
+.template-index.home-phone .s2-card-actions {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr) 84px;
+  gap: 4px;
+}
+.template-index.home-phone .s2-card-actions .quantity-stepper { padding: 0; gap: 0; }
+.template-index.home-phone .s2-card-actions .stepper-btn { width: 28px; height: 32px; flex-shrink: 0; }
+.template-index.home-phone .s2-card-actions .stepper-value { width: 20px; font-size: 14px; }
+.template-index.home-phone .s2-book-sidebar #btnAddToCart,
+.template-index.home-phone .s2-book-sidebar .s2-look-inside-btn {
+  min-width: 0;
+  min-height: 36px;
+  padding: 6px 3px !important;
+  font-size: 12px !important;
+  line-height: 20px;
+  letter-spacing: 0 !important;
+  white-space: nowrap;
+  transition-property: background, border-color, box-shadow, transform !important;
+}
+.template-index.home-phone .s2-book-canvas-container { touch-action: pan-y pinch-zoom; }
+.template-index.home-phone .s2-book-canvas-container canvas { display: block; }
+.template-index.home-phone .s1-control-btn { min-height: 36px; padding: 5px 10px; font-size: 12px; }
+.template-index.home-phone .s1-controls-bar { transition-property: background, box-shadow; }
+.template-index.home-phone .s3-shop-nav-btn { min-width: 40px; min-height: 40px; }
+.template-index.home-phone .reviews-section {
+  padding: 32px var(--home-safe-right) 36px var(--home-safe-left);
+  background-attachment: scroll;
+}
+.template-index.home-phone .reviews-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+.template-index.home-phone .review-card { min-width: 0; padding: 18px; }
+.template-index.home-phone .reviews-header .shopfront-subtitle { font-size: 14px; }
+.template-index.home-phone .site-footer { padding: 36px var(--home-safe-right) 24px var(--home-safe-left); }
+.template-index.home-phone .footer-container { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-bottom: 24px; }
+.template-index.home-phone .footer-container > div { min-width: 0; }
+.template-index.home-phone .footer-container > div:first-child { grid-column: 1 / -1; }
+.template-index.home-phone .footer-brand-title { font-size: 28px; flex-wrap: wrap; }
+.template-index.home-phone .footer-form { min-width: 0; }
+.template-index.home-phone .footer-email-input { min-width: 0; width: 100%; font-size: 16px; }
+.template-index.home-phone .footer-nav-link { padding-block: 4px; overflow-wrap: anywhere; }
+.template-index.home-phone .footer-copy,
+.template-index.home-phone .footer-sub-text { font-size: 14px; }
+.template-index.home-phone .cart-drawer { height: 100dvh; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.template-index.home-phone .cart-drawer-header,
+.template-index.home-phone .cart-drawer-footer { flex-shrink: 0; padding: 12px 16px; }
+.template-index.home-phone .cart-drawer-body { min-height: 0; padding: 12px 16px; }
+.template-index.home-phone .cart-item-card { padding: 10px; gap: 10px; }
+.template-index.home-phone .cart-item-details { min-width: 0; }
+.template-index.home-phone .cart-item-title { overflow-wrap: anywhere; font-size: 14px; }
+.template-index.home-phone .modal-cartoon-dialog { max-height: calc(100dvh - 24px); padding: 24px 16px; }
+
+/* Landscape keeps the desktop scene coordinates instead of the portrait stack. */
+.template-index.home-landscape .psd-section-cinema { height: 70vw; min-height: 0; padding: 0; }
+.template-index.home-landscape .s1-video-stage { left: 20.73%; top: 7.16%; width: 58.53%; height: 60.92%; }
+.template-index.home-landscape .s1-controls-bar { top: 68.15%; bottom: auto; padding: 4px 8px; gap: 6px; }
+.template-index.home-landscape .psd-section-forest { height: 62.27vw; min-height: 0; padding: 0; background: #1a0d38; }
+.template-index.home-landscape #s2-l-bg > img { mask-image: none; -webkit-mask-image: none; }
+.template-index.home-landscape #s2-l-cat { top: 6.20vw; bottom: auto; }
+.template-index.home-landscape .s2-book-stage {
+  position: absolute;
+  left: 6.25vw;
+  top: 12.785vw;
+  bottom: auto;
+  width: 36vw;
+  height: 42vw;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+.template-index.home-landscape .s2-book-stage > .s2-book-canvas-wrapper { height: 100%; min-height: 0; overflow: visible; z-index: 0; }
+.template-index.home-landscape .s2-book-canvas-container { position: absolute; inset: 0; }
+.template-index.home-landscape .s2-book-sidebar {
+  position: absolute;
+  left: 37.25vw;
+  top: var(--book-sidebar-top, 13.215vw);
+  width: min(50vw, 420px);
+  max-width: calc(56.5vw - var(--home-safe-right));
+  z-index: 1;
+}
+.template-index.home-landscape .s2-book-controls-row { flex-wrap: nowrap; }
+.template-index.home-landscape .s2-book-buy-card { max-width: none; padding: 4px 8px; gap: 3px; }
+.template-index.home-landscape .s2-card-actions { margin-top: 0; }
+.template-index.home-landscape .s3-window-display { width: 17%; height: 33%; }
+.template-index.home-landscape .s3-plushie-window-img { bottom: 17%; }
+.template-index.home-landscape .s3-toy-hotspot::after { bottom: calc(17% - 0.2vw); }
+.template-index.home-landscape .s3-window-badge { font-size: 11px; padding: 4px 8px; }
+.template-index.home-landscape .footer-container { grid-template-columns: 1.2fr 1fr 1.2fr; }
+.template-index.home-landscape .footer-container > div:first-child { grid-column: auto; }
+.template-index.home-landscape .footer-brand-title { font-size: 24px; }
+
+.template-index.home-phone:not(.home-landscape) .main-nav { grid-template-columns: 1fr; }
+.template-index.home-phone:not(.home-landscape) .footer-container { grid-template-columns: 1fr; }
+.template-index.home-phone:not(.home-landscape) .footer-container > div:first-child { grid-column: auto; }
 
 /* Accessibility: Reduced Motion */
 @media (prefers-reduced-motion: reduce) {

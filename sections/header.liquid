@@ -6,7 +6,7 @@
     </a>
 
     <!-- Navigation Links -->
-    <nav class="main-nav-wrapper">
+    <nav class="main-nav-wrapper" {% if template.name == 'index' %}id="homeMobileNav"{% endif %} aria-label="Main navigation">
       <ul class="main-nav">
         <li><a href="/" class="nav-link">Home</a></li>
         <li><a href="#reviews" class="nav-link">Reviews</a></li>
@@ -24,9 +24,18 @@
       <button type="button" class="btn-cartoon btn-header-cart" id="openCartBtn">
         🛒 Cart <span class="cart-btn-badge" id="cartCountBadge">1</span>
       </button>
+      {% if template.name == 'index' %}
+        <button type="button" class="home-menu-toggle" aria-controls="homeMobileNav" aria-expanded="false">Menu</button>
+      {% endif %}
     </div>
   </div>
 </header>
+{% if template.name == 'index' %}
+  <aside class="home-orientation-hint" id="homeOrientationHint" hidden aria-label="Viewing suggestion">
+    <p role="status">Rotate your phone for the best viewing experience.</p>
+    <button type="button" aria-label="Dismiss rotation suggestion">✕</button>
+  </aside>
+{% endif %}
 
 {% schema %}
 {
