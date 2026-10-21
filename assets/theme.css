@@ -1402,9 +1402,14 @@ body.template-index {
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(100% - 1px);
-  height: 2.5vw;
-  background: url('images/parallax/section 2/river-bridge.webp') center bottom / 100vw 23.3333vw no-repeat;
+  /* Overlap the source image's 10px transparent tail using opaque water. */
+  top: calc(100% - 0.7vw);
+  height: 3.2vw;
+  background: url('images/parallax/section 2/river-bridge.webp') center calc(100% + 0.333333vw) / 100% 23.3333vw no-repeat;
+  /* The mask fades the rendered top edge after the vertical reflection. */
+  mask-image: linear-gradient(to top, transparent 0, #000 0.25vw);
+  -webkit-mask-image: linear-gradient(to top, transparent 0, #000 0.25vw);
+  transform: scaleY(-1);
 }
 
 /* ==========================================================================
@@ -2001,16 +2006,17 @@ body.template-index {
   z-index: 1;
 }
 #s3-l1-walls img {
-  mask-image: linear-gradient(to bottom, transparent 0%, transparent 9.9%, #000 10.6%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 9.9%, #000 10.6%);
+  /* Reveal water above the trim without moving the architecture below it. */
+  mask-image: linear-gradient(to bottom, transparent 0%, transparent 12.95%, #000 13.6%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 12.95%, #000 13.6%);
 }
 
 /* ── LAYER 2: Scalloped Trim / Awning Edge (Decorative Wavy Top Border) ──
-   Exact layout position at top: 0. Scalloped trim at row 94 sits precisely over wall panels */
+   Lower the painted water edge onto the pillar tops at its original scale. */
 #s3-l2-trim {
-  top: 0;
+  top: 2vw;
   height: 10.37vw;
-  z-index: 2;
+  z-index: 5; /* Water overlaps the pillars (4) and the upper window arches (3). */
 }
 #s3-l2-trim img {
   mask-image: linear-gradient(to bottom, transparent 0%, transparent 30%, #000 39%);
