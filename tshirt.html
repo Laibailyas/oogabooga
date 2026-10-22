@@ -432,8 +432,23 @@
 
     /* ── HEADER ── */
     .ts-page-header {
+      position: relative;
       text-align: center;
       padding: 56px 0 40px;
+    }
+
+    .ts-page-back {
+      position: absolute;
+      top: 0;
+      left: 0;
+      box-sizing: border-box;
+      min-height: 44px;
+      max-width: 100%;
+    }
+
+    .ts-page-back:focus-visible {
+      outline: 2px solid var(--color-yellow-accent);
+      outline-offset: 3px;
     }
 
     .ts-vintage-tag {
@@ -933,6 +948,7 @@ html[data-site-swapping] body > :not(#homeEntryScreen):not(#siteNavigationStatus
 
       <!-- Page Header -->
       <div class="ts-page-header">
+        <a href="index.html" class="btn-product-back ts-page-back">← Back to Ooga Booga World</a>
         <div class="ts-vintage-tag">★ OFFICIAL MERCH — COMING SOON ★</div>
         <h1 class="ts-page-title">Ooga Booga!<br>Vintage Tees</h1>
         <p class="ts-page-subtitle">Hand-illustrated characters from the world of Ooga Booga! — printed on premium vintage-washed cotton. Coming soon.</p>
