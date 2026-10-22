@@ -14,9 +14,22 @@
   const isHomeLandscape = () => isHomePhone() && homeLandscapeQuery.matches;
   const reduceHomeMotion = () => isHomePhone() && reducedMotionQuery.matches;
 
+  let currentScope = null;
+  const pageScopes = new Map();
+  function lifecycleTools() {
+    const lifecycle = currentScope;
+    return { lifecycle,
+      on: (target, ...args) => lifecycle ? lifecycle.listen(target, ...args) : target.addEventListener(...args),
+      requestAnimationFrame: lifecycle ? lifecycle.frame : window.requestAnimationFrame.bind(window),
+      setTimeout: lifecycle ? lifecycle.timeout : window.setTimeout.bind(window),
+      ResizeObserver: lifecycle ? lifecycle.Observer : window.ResizeObserver
+    };
+  }
+
   // Phone layout and orientation are owned by the early homepage bootstrap.
   function initHomepagePhoneLayout() {
-    if (!document.body.classList.contains('template-index')) return;
+    const { lifecycle, on, requestAnimationFrame, setTimeout, ResizeObserver } = lifecycleTools();
+    if (!document.body.classList.contains('template-index') && !window.OogaMobileSite) return;
     const header = document.getElementById('SiteHeader');
     const menu = header && header.querySelector('.home-menu-toggle');
     const nav = document.getElementById('homeMobileNav');
@@ -26,14 +39,14 @@
       menu.setAttribute('aria-expanded', 'false');
       if (returnFocus) menu.focus({ preventScroll: true });
     }
-    menu.addEventListener('click', () => {
+    on(menu, 'click', () => {
       const open = !document.body.classList.contains('home-menu-open');
       document.body.classList.toggle('home-menu-open', open);
       menu.setAttribute('aria-expanded', String(open));
     });
-    nav.addEventListener('click', event => { if (event.target.closest('a')) closeMenu(); });
-    document.addEventListener('click', event => { if (!header.contains(event.target)) closeMenu(); });
-    document.addEventListener('keydown', event => {
+    on(nav, 'click', event => { if (event.target.closest('a')) closeMenu(); });
+    on(document, 'click', event => { if (!header.contains(event.target)) closeMenu(); });
+    on(document, 'keydown', event => {
       if (event.key === 'Escape' && document.body.classList.contains('home-menu-open')) closeMenu(true);
     });
   }
@@ -81,6 +94,7 @@
 
   // 2. MULTI-PLANE PARALLAX SCROLLING ENGINE (Inspired by Stepout Dribbble Reference)
   function initParallax() {
+    const { lifecycle, on, requestAnimationFrame, setTimeout, ResizeObserver } = lifecycleTools();
     const s1 = document.getElementById('cinema-hero');
     const s2 = document.getElementById('enchanted-forest');
     const s3 = document.getElementById('village-shopfront');
@@ -202,15 +216,15 @@
       }
     }
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('homepage:layout', onScroll);
+    on(window, 'scroll', onScroll, { passive: true });
+    on(window, 'homepage:layout', onScroll);
     updateParallax();
 
     // Desktop Mouse Move Dynamic 3D Depth (Cinema & Forest)
     if (window.innerWidth > 992 && !isHomePhone()) {
       function attachMouseParallax(section, layers) {
         if (!section) return;
-        section.addEventListener('mousemove', function (e) {
+        on(section, 'mousemove', function (e) {
           if (isHomePhone()) return;
           const rect = section.getBoundingClientRect();
           const relX = (e.clientX - rect.left) / rect.width - 0.5;
@@ -225,7 +239,7 @@
           });
         });
 
-        section.addEventListener('mouseleave', function () {
+        on(section, 'mouseleave', function () {
           layers.forEach(function (layer) {
             if (layer.el) {
               layer.el._mouseX = 0;
@@ -258,6 +272,7 @@
 
   // 2b. GSAP + SCROLLTRIGGER CINEMATIC 8-LAYER PARALLAX ENGINE FOR SECTION 3
   function initSection3Parallax() {
+    const { lifecycle, on, requestAnimationFrame, setTimeout, ResizeObserver } = lifecycleTools();
     const s3 = document.getElementById('village-shopfront');
     if (!s3) return;
 
@@ -354,7 +369,7 @@
           });
         }
       }
-      window.addEventListener('scroll', () => {
+      on(window, 'scroll', () => {
         if (!ticking) {
           requestAnimationFrame(() => {
             updateS3Fallback();
@@ -363,13 +378,13 @@
           ticking = true;
         }
       }, { passive: true });
-      window.addEventListener('homepage:layout', updateS3Fallback);
+      on(window, 'homepage:layout', updateS3Fallback);
       updateS3Fallback();
     }
 
     // 2. Desktop Mouse Parallax (Dynamic 3D Depth on Cursor Move)
     if (window.innerWidth > 992 && !isHomePhone()) {
-      s3.addEventListener('mousemove', function (e) {
+      on(s3, 'mousemove', function (e) {
         if (isHomePhone()) return;
         const rect = s3.getBoundingClientRect();
         const relX = (e.clientX - rect.left) / rect.width - 0.5;
@@ -390,7 +405,7 @@
         });
       });
 
-      s3.addEventListener('mouseleave', function () {
+      on(s3, 'mouseleave', function () {
         layers.forEach(({ el, mouseX }) => {
           if (!el || !mouseX) return;
           if (typeof gsap !== 'undefined') {
@@ -408,6 +423,7 @@
 
   // Keep the purchase controls below the illustrated tree characters.
   function initBookSidebarLayout() {
+    const { lifecycle, on, requestAnimationFrame, setTimeout, ResizeObserver } = lifecycleTools();
     const section = document.getElementById('enchanted-forest');
     const stage = section && section.querySelector('.s2-book-stage');
     const sidebar = stage && stage.querySelector('.s2-book-sidebar');
@@ -443,8 +459,8 @@
     }
 
     layout();
-    window.addEventListener('resize', scheduleLayout, { passive: true });
-    window.addEventListener('homepage:layout', scheduleLayout);
+    on(window, 'resize', scheduleLayout, { passive: true });
+    on(window, 'homepage:layout', scheduleLayout);
     if (document.fonts) document.fonts.ready.then(scheduleLayout);
     if (typeof ResizeObserver !== 'undefined') {
       const observer = new ResizeObserver(scheduleLayout);
@@ -455,6 +471,7 @@
 
   // 3. THREE.JS 3D BOOK VIEWER (PRIMARY PRODUCT)
   function initThreeJsBookViewer(containerId, glbPath) {
+    const { lifecycle, on, requestAnimationFrame, setTimeout, ResizeObserver } = lifecycleTools();
     const container = document.getElementById(containerId);
     if (!container) return;
 
@@ -614,7 +631,7 @@
     );
 
     // Mouse & Touch Drag Controls
-    container.addEventListener('mousedown', function (e) {
+    on(container, 'mousedown', function (e) {
       if (isHomepageBook && isHomePhone()) return;
       isDragging = true;
       autoRotate = false;
@@ -623,7 +640,7 @@
       prevMouseY = e.clientY;
     });
 
-    window.addEventListener('mouseup', function () {
+    on(window, 'mouseup', function () {
       if (isDragging) {
         isDragging = false;
         // Resume slow auto-rotate after 2.5 seconds idle
@@ -633,7 +650,7 @@
       }
     });
 
-    container.addEventListener('mousemove', function (e) {
+    on(container, 'mousemove', function (e) {
       if (isHomepageBook && isHomePhone()) return;
       if (!isDragging || !pivotGroup) return;
       const deltaX = e.clientX - prevMouseX;
@@ -646,7 +663,7 @@
     });
 
     // Touch Support for Mobile
-    container.addEventListener('touchstart', function (e) {
+    on(container, 'touchstart', function (e) {
       if (isHomepageBook && isHomePhone()) return;
       if (e.touches.length === 1) {
         isDragging = true;
@@ -657,7 +674,7 @@
       }
     }, { passive: true });
 
-    container.addEventListener('touchmove', function (e) {
+    on(container, 'touchmove', function (e) {
       if (isHomepageBook && isHomePhone()) return;
       if (!isDragging || !pivotGroup || e.touches.length !== 1) return;
       const deltaX = e.touches[0].clientX - prevMouseX;
@@ -668,7 +685,7 @@
       prevMouseY = e.touches[0].clientY;
     }, { passive: true });
 
-    container.addEventListener('touchend', function () {
+    on(container, 'touchend', function () {
       if (isHomepageBook && isHomePhone()) return;
       if (isDragging) {
         isDragging = false;
@@ -695,14 +712,14 @@
       resumeTimer = setTimeout(() => { if (!isDragging && !isTweening) autoRotate = true; }, 2500);
     }
     if (isHomepageBook) {
-      container.addEventListener('pointerdown', e => {
+      on(container, 'pointerdown', e => {
         if (!isHomePhone()) return;
         if (!e.isPrimary || phonePointer !== null) { finishPhoneDrag(); return; }
         phonePointer = e.pointerId;
         phoneStartX = prevMouseX = e.clientX;
         phoneStartY = e.clientY;
       });
-      container.addEventListener('pointermove', e => {
+      on(container, 'pointermove', e => {
         if (e.pointerId !== phonePointer || !isHomePhone()) return;
         const dx = e.clientX - phoneStartX;
         const dy = e.clientY - phoneStartY;
@@ -717,13 +734,13 @@
         pivotGroup.rotation.y += (e.clientX - prevMouseX) * 0.015;
         prevMouseX = e.clientX;
       });
-      container.addEventListener('pointerup', finishPhoneDrag);
-      container.addEventListener('pointercancel', finishPhoneDrag);
-      container.addEventListener('lostpointercapture', e => {
+      on(container, 'pointerup', finishPhoneDrag);
+      on(container, 'pointercancel', finishPhoneDrag);
+      on(container, 'lostpointercapture', e => {
         // Ignore the canvas releasing its implicit capture when the wrapper takes over.
         if (e.target === container) finishPhoneDrag();
       });
-      window.addEventListener('homepage:layout', finishPhoneDrag);
+      on(window, 'homepage:layout', finishPhoneDrag);
     }
 
     // Preset Angle Buttons
@@ -752,7 +769,7 @@
     }
 
     if (btnCover) {
-      btnCover.addEventListener('click', () => {
+      on(btnCover, 'click', () => {
         playCartoonPop(520);
         // Front Cover: Standing upright vertically ("khari"), facing directly to camera
         animateToRotation(0, 0, 0);
@@ -760,7 +777,7 @@
     }
 
     if (btnBack) {
-      btnBack.addEventListener('click', () => {
+      on(btnBack, 'click', () => {
         playCartoonPop(640);
         // Back Cover: Standing upright vertically ("khari"), back side facing directly to camera
         animateToRotation(0, Math.PI, 0);
@@ -768,7 +785,7 @@
     }
 
     if (btnSpine) {
-      btnSpine.addEventListener('click', () => {
+      on(btnSpine, 'click', () => {
         playCartoonPop(580);
         // Spine: Standing upright vertically ("khari"), spine text facing directly to camera
         animateToRotation(0, Math.PI / 2, 0);
@@ -776,7 +793,7 @@
     }
 
     if (btnReset) {
-      btnReset.addEventListener('click', () => {
+      on(btnReset, 'click', () => {
         playCartoonPop(480);
         // Reset View: Standing upright at dynamic 3D angle + resume auto-rotation
         animateToRotation(THREE.MathUtils.degToRad(8), THREE.MathUtils.degToRad(-25), 0, true);
@@ -785,6 +802,7 @@
 
     // Animation Loop
     let clock = new THREE.Clock();
+    if (lifecycle) { lifecycle.clocks.push(clock); lifecycle.cleanups.push(() => { renderer.dispose(); scene.traverse(object => { if (object.isMesh) { object.geometry?.dispose(); const materials = Array.isArray(object.material) ? object.material : [object.material]; materials.forEach(material => material?.dispose()); } }); }); }
     function animate() {
       requestAnimationFrame(animate);
       const delta = clock.getDelta();
@@ -819,7 +837,7 @@
     animate();
 
     // Resize Handler
-    window.addEventListener('resize', function () {
+    on(window, 'resize', function () {
       resizeBookViewer(container.clientWidth, container.clientHeight);
     });
     if (isHomepageBook) {
@@ -832,13 +850,14 @@
           resizeBookViewer(container.clientWidth, container.clientHeight);
         });
       }
-      window.addEventListener('homepage:layout', scheduleViewerResize);
+      on(window, 'homepage:layout', scheduleViewerResize);
       if (typeof ResizeObserver !== 'undefined') new ResizeObserver(scheduleViewerResize).observe(container);
     }
   }
 
   // 4. LEGACY VILLAGE TRACK CAROUSEL (IF PRESENT)
   function initLegacyTrackCarousel() {
+    const { lifecycle, on, requestAnimationFrame, setTimeout, ResizeObserver } = lifecycleTools();
     const track = document.getElementById('tshirtCarouselTrack');
     const prevBtn = document.getElementById('carouselPrevBtn');
     const nextBtn = document.getElementById('carouselNextBtn');
@@ -855,7 +874,7 @@
     }
 
     if (prevBtn) {
-      prevBtn.addEventListener('click', function () {
+      on(prevBtn, 'click', function () {
         playCartoonPop(480);
         state.carouselIndex = (state.carouselIndex > 0) ? state.carouselIndex - 1 : maxIndex;
         updateCarousel();
@@ -863,7 +882,7 @@
     }
 
     if (nextBtn) {
-      nextBtn.addEventListener('click', function () {
+      on(nextBtn, 'click', function () {
         playCartoonPop(540);
         state.carouselIndex = (state.carouselIndex < maxIndex) ? state.carouselIndex + 1 : 0;
         updateCarousel();
@@ -873,16 +892,17 @@
 
   // 5. INTERACTIVE PLUSHIE BEHAVIOR
   function initPlushieInteraction() {
+    const { lifecycle, on, requestAnimationFrame, setTimeout, ResizeObserver } = lifecycleTools();
     const plushieZone = document.getElementById('plushieShopZone');
     const plushieModal = document.getElementById('plushieModal');
     if (!plushieZone || plushieZone.matches('a[href]') || !plushieModal) return;
 
-    plushieZone.addEventListener('click', function () {
+    on(plushieZone, 'click', function () {
       playCartoonPop(660);
       plushieModal.classList.add('active');
     });
 
-    plushieZone.addEventListener('keydown', function (e) {
+    on(plushieZone, 'keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         playCartoonPop(660);
@@ -892,13 +912,13 @@
 
     const closeBtn = plushieModal.querySelector('.modal-close-icon');
     if (closeBtn) {
-      closeBtn.addEventListener('click', function () {
+      on(closeBtn, 'click', function () {
         playCartoonPop(380);
         plushieModal.classList.remove('active');
       });
     }
 
-    plushieModal.addEventListener('click', function (e) {
+    on(plushieModal, 'click', function (e) {
       if (e.target === plushieModal) {
         plushieModal.classList.remove('active');
       }
@@ -907,6 +927,7 @@
 
   // 6. VIDEO PLAYER CONTROLS
   function initVideoCinema() {
+    const { lifecycle, on, requestAnimationFrame, setTimeout, ResizeObserver } = lifecycleTools();
     const video = document.getElementById('cinemaVideo');
     const playBtn = document.getElementById('btnPlayVideo');
     const muteBtn = document.getElementById('btnMuteVideo');
@@ -922,13 +943,15 @@
       if (playBtn) playBtn.textContent = video.paused ? '▶ PLAY' : '⏸ PAUSE';
       if (muteBtn) muteBtn.textContent = video.muted ? '🔇 UNMUTE' : '🔊 MUTE';
     }
+    if (lifecycle) lifecycle.video = video;
     function tryPlay() {
+      if (lifecycle && !lifecycle.active) return;
       const result = video.play();
       if (result && result.catch) result.catch(() => { if (!switching) updateButtons(); });
     }
     function updateVideoSource() {
       // A covered portrait view keeps the existing landscape media and playback state.
-      if (window.OogaHomeEntry && isHomePhone() && !window.OogaHomeEntry.isLandscape()) return;
+      if ((window.OogaSiteEntry || window.OogaHomeEntry) && isHomePhone() && !(window.OogaSiteEntry || window.OogaHomeEntry).isLandscape()) return;
       const phone = isHomePhone();
       const source = phone ? (isHomeLandscape() ? landscapeSource : portraitSource || landscapeSource)
         : (window.innerWidth < 768 && portraitSource ? portraitSource : landscapeSource);
@@ -942,7 +965,7 @@
       // Source changes resume explicitly so autoplay cannot override a user's pause.
       video.autoplay = false;
       video.src = source;
-      video.addEventListener('loadedmetadata', () => {
+      on(video, 'loadedmetadata', () => {
         if (version !== switchVersion) return;
         const end = Number.isFinite(video.duration) ? Math.max(0, video.duration - 0.1) : position;
         try { video.currentTime = Math.min(position, end); } catch (_) { /* A stream may not be seekable. */ }
@@ -954,14 +977,14 @@
     }
     // Keep the selected source in sync with orientation without resetting media controls.
     updateVideoSource();
-    if (document.body.classList.contains('template-index')) window.addEventListener('homepage:layout', updateVideoSource);
-    video.addEventListener('play', () => { playbackIntent = true; updateButtons(); });
-    video.addEventListener('pause', () => { if (!switching) playbackIntent = false; updateButtons(); });
-    video.addEventListener('volumechange', updateButtons);
-    video.addEventListener('error', () => { switching = false; updateButtons(); });
+    if (document.body.classList.contains('template-index')) on(window, 'homepage:layout', updateVideoSource);
+    on(video, 'play', () => { playbackIntent = true; updateButtons(); });
+    on(video, 'pause', () => { if (!switching) playbackIntent = false; updateButtons(); });
+    on(video, 'volumechange', updateButtons);
+    on(video, 'error', () => { switching = false; updateButtons(); });
 
     if (playBtn) {
-      playBtn.addEventListener('click', function () {
+      on(playBtn, 'click', function () {
         playCartoonPop(500);
         if (video.paused) {
           playbackIntent = true;
@@ -975,7 +998,7 @@
     }
 
     if (muteBtn) {
-      muteBtn.addEventListener('click', function () {
+      on(muteBtn, 'click', function () {
         playCartoonPop(550);
         video.muted = !video.muted;
         updateButtons();
@@ -985,6 +1008,7 @@
 
   // 7. CART DRAWER & VARIANT LOGIC
   function initCartAndVariants() {
+    const { lifecycle, on, requestAnimationFrame, setTimeout, ResizeObserver } = lifecycleTools();
     const cartDrawer = document.getElementById('cartDrawer');
     const cartOverlay = document.getElementById('cartOverlay');
     const openCartBtn = document.getElementById('openCartBtn');
@@ -992,11 +1016,12 @@
     const addToCartBtn = document.getElementById('btnAddToCart');
 
     // Variant cards
-    const variantCards = document.querySelectorAll('.variant-card');
+    if (lifecycle) { const selected = document.querySelector('.variant-card.selected[data-variant]'); if (selected) state.selectedVariant = selected.dataset.variant; }
+    const variantCards = document.querySelectorAll('.variant-card[data-variant]');
     const bookPriceDisplay = document.getElementById('bookPriceDisplay');
 
     variantCards.forEach(card => {
-      card.addEventListener('click', function () {
+      on(card, 'click', function () {
         playCartoonPop(520);
         variantCards.forEach(c => c.classList.remove('selected'));
         this.classList.add('selected');
@@ -1014,7 +1039,7 @@
     const qtyPlus = document.getElementById('qtyPlusBtn');
 
     if (qtyMinus && qtyInput) {
-      qtyMinus.addEventListener('click', () => {
+      on(qtyMinus, 'click', () => {
         let val = parseInt(qtyInput.value) || 1;
         if (val > 1) {
           qtyInput.value = val - 1;
@@ -1024,7 +1049,7 @@
     }
 
     if (qtyPlus && qtyInput) {
-      qtyPlus.addEventListener('click', () => {
+      on(qtyPlus, 'click', () => {
         let val = parseInt(qtyInput.value) || 1;
         qtyInput.value = val + 1;
         playCartoonPop(600);
@@ -1044,13 +1069,13 @@
       if (cartOverlay) cartOverlay.classList.remove('active');
     }
 
-    if (openCartBtn) openCartBtn.addEventListener('click', openCart);
-    if (closeCartBtn) closeCartBtn.addEventListener('click', closeCart);
-    if (cartOverlay) cartOverlay.addEventListener('click', closeCart);
+    if (openCartBtn) on(openCartBtn, 'click', openCart);
+    if (closeCartBtn) on(closeCartBtn, 'click', closeCart);
+    if (cartOverlay) on(cartOverlay, 'click', closeCart);
 
     // Add To Cart
     if (addToCartBtn) {
-      addToCartBtn.addEventListener('click', function () {
+      on(addToCartBtn, 'click', function () {
         const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
         const variantTitle = state.selectedVariant === 'hardcover' ? 'Hardcover (Collector Edition)' : 'Softcover (Classic Edition)';
         const variantPrice = state.variantPrices[state.selectedVariant];
@@ -1099,6 +1124,7 @@
           </div>
           <button type="button" class="cart-item-remove" data-index="${idx}" aria-label="Remove item">✕</button>
         `;
+        if (lifecycle) card.querySelector('img').src = new URL(item.image, location.origin + '/').href;
         itemsContainer.appendChild(card);
       });
 
@@ -1115,22 +1141,24 @@
       });
     }
 
+    if (lifecycle) lifecycle.refreshCart = renderCart;
     renderCart();
   }
 
   // 8. NOTIFY MODAL LOGIC
   function initNotifyModal() {
+    const { lifecycle, on, requestAnimationFrame, setTimeout, ResizeObserver } = lifecycleTools();
     const notifyModal = document.getElementById('notifyModal');
     const notifyBtns = document.querySelectorAll('.btn-notify');
     if (!notifyModal) return;
 
     notifyBtns.forEach(btn => {
-      btn.addEventListener('click', function (e) {
+      on(btn, 'click', function (e) {
         e.stopPropagation();
         playCartoonPop(520);
         notifyModal.classList.add('active');
       });
-      btn.addEventListener('keydown', function (e) {
+      on(btn, 'keydown', function (e) {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           playCartoonPop(520);
@@ -1141,13 +1169,13 @@
 
     const closeBtn = notifyModal.querySelector('.modal-close-icon');
     if (closeBtn) {
-      closeBtn.addEventListener('click', () => {
+      on(closeBtn, 'click', () => {
         playCartoonPop(380);
         notifyModal.classList.remove('active');
       });
     }
 
-    notifyModal.addEventListener('click', (e) => {
+    on(notifyModal, 'click', (e) => {
       if (e.target === notifyModal) {
         notifyModal.classList.remove('active');
       }
@@ -1155,7 +1183,7 @@
 
     const form = notifyModal.querySelector('form');
     if (form) {
-      form.addEventListener('submit', function (e) {
+      on(form, 'submit', function (e) {
         e.preventDefault();
         playCartoonPop(680);
         alert('🎉 You are on the VIP waitlist for Ooga Booga merchandise!');
@@ -1166,6 +1194,7 @@
 
   // 9. SECTION 3 SHOPFRONT CAROUSEL (4 PRODUCTS WITH IN-PLACE FADE/POP)
   function initShopfrontCarousel() {
+    const { lifecycle, on, requestAnimationFrame, setTimeout, ResizeObserver } = lifecycleTools();
     const window1 = document.getElementById('s3Window1');
     const window2 = document.getElementById('s3Window2');
     const prevBtn = document.getElementById('s3ShopPrev');
@@ -1278,7 +1307,7 @@
     }
 
     if (prevBtn) {
-      prevBtn.addEventListener('click', (e) => {
+      on(prevBtn, 'click', (e) => {
         e.stopPropagation();
         e.preventDefault();
         changeProducts('prev');
@@ -1286,7 +1315,7 @@
     }
 
     if (nextBtn) {
-      nextBtn.addEventListener('click', (e) => {
+      on(nextBtn, 'click', (e) => {
         e.stopPropagation();
         e.preventDefault();
         changeProducts('next');
@@ -1306,8 +1335,28 @@
     initVideoCinema();
     initCartAndVariants();
     initNotifyModal();
+    if (window.OogaMerchPages) window.OogaMerchPages.mount(document.body.dataset.sitePage, currentScope);
   }
-  if (window.OogaHomeEntry && document.body.classList.contains('template-index')) window.OogaHomeEntry.register(startTheme);
+  window.OogaPageRuntime = {
+    mount(key) {
+      if (pageScopes.has(key)) { this.resume(key); return; }
+      const scope = window.OogaMobileSite.createScope(); pageScopes.set(key, scope);
+      const before = window.ScrollTrigger ? ScrollTrigger.getAll() : [];
+      currentScope = scope;
+      try { startTheme(); } finally { currentScope = null; }
+      if (window.ScrollTrigger) scope.triggers = ScrollTrigger.getAll().filter(trigger => !before.includes(trigger));
+    },
+    suspend(key) { pageScopes.get(key)?.suspend(); },
+    resume(key) {
+      const scope = pageScopes.get(key); if (!scope) return;
+      const selected = document.querySelector('.variant-card.selected[data-variant]');
+      if (selected) state.selectedVariant = selected.dataset.variant;
+      scope.resume(); scope.refreshCart?.();
+    },
+    dispose(key) { pageScopes.get(key)?.dispose(); pageScopes.delete(key); }
+  };
+  if (window.OogaSiteEntry) window.OogaSiteEntry.register(startTheme);
+  else if (window.OogaHomeEntry && document.body.classList.contains('template-index')) window.OogaHomeEntry.register(startTheme);
   else if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startTheme, { once: true });
   else startTheme();
 

@@ -8,7 +8,8 @@
   <meta name="description"
     content="Step into the wild vintage cartoon world of Ooga Booga! Explore the official interactive 3D book, watch the animated short film, and discover coming soon merchandise.">
 
-<!-- HOMEPAGE ENTRY HEAD: keep the static homepage copy in sync with this snippet. -->
+<!-- Homepage resources: the entry controller activates these after rotation. -->
+  <!-- STATIC SITE ENTRY HEAD: canonical block for the four Vercel documents. -->
 <style id="homeEntryCritical">
   #homeEntryScreen { display: none; }
   html[data-home-entry="waiting"], html[data-home-entry="loading"], html[data-home-entry="error"] { overflow: hidden; }
@@ -62,11 +63,13 @@
 <script id="homeEntryBootstrap">
 (function () {
   'use strict';
-  if (window.OogaHomeEntry) return;
+  if (window.OogaSiteEntry) return;
   const root = document.documentElement;
   const portrait = matchMedia('(hover: none) and (pointer: coarse) and (max-width: 600px) and (orientation: portrait)');
   const landscape = matchMedia('(hover: none) and (pointer: coarse) and (max-width: 1024px) and (max-height: 600px) and (orientation: landscape)');
   const styles = new Map();
+  const scripts = new Map();
+  let exitMessage = false;
   const inertElements = new Map();
   let gate, dialog, button, initializer;
   let domReady = false, resourcePromise, resourcesReady = false, started = false, failed = false;
@@ -90,6 +93,7 @@
   function updateLayout() {
     if (!document.body) return;
     const phone = isPhone(), wide = phone && landscape.matches;
+    document.body.classList.toggle('site-phone', phone);
     document.body.classList.toggle('home-phone', phone);
     document.body.classList.toggle('home-landscape', wide);
     root.classList.toggle('home-phone-page', phone);
@@ -126,6 +130,7 @@
     const loading = allowed() && !failed;
     dialog.querySelector('h2').textContent = failed ? 'Unable to load the website' : fallback && !loading ? 'Please rotate your phone' : 'Best viewed in landscape';
     dialog.querySelector('p').textContent = failed ? 'We couldn’t load the website. Please check your connection and try again.'
+      : exitMessage && !loading ? 'There is no earlier page to return to. Rotate your phone to continue, or use your browser’s controls to leave.'
       : rotating ? 'Switching to landscape…' : loading ? 'Loading landscape view…'
         : fallback ? 'We couldn’t switch to landscape automatically. Please turn your phone sideways to continue.'
           : 'Rotate your phone for the best viewing experience.';
@@ -161,7 +166,7 @@
     else if (initialPhoneCover && location.hash) {
       try { const target = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (target) target.scrollIntoView({ behavior: 'instant' }); } catch (_) { /* Invalid fragments are harmless. */ }
     }
-    initialPhoneCover = false;
+    initialPhoneCover = false; exitMessage = false;
     let target = focusBefore;
     const overlay = document.querySelector('.cart-drawer.active, .modal-overlay.active');
     if (overlay && (!target || !overlay.contains(target))) target = overlay.querySelector('button, a[href], input');
@@ -176,6 +181,8 @@
   }
   function prepareStyles() {
     document.querySelectorAll('link[data-home-style]').forEach(link => {
+      const expected = asset('assets/theme.css');
+      if (link.href.split('?')[0] !== expected) link.href = expected;
       if (!styles.has(link)) {
         const ready = new Promise((resolve, reject) => {
           link.addEventListener('load', resolve, { once: true });
@@ -198,12 +205,26 @@
   function hasGlobal(name) { return name.split('.').reduce((value, part) => value && value[part], window); }
   function loadScript(item) {
     if (item.global && hasGlobal(item.global)) return Promise.resolve();
-    return new Promise((resolve, reject) => {
+    if (scripts.has(item.src)) return scripts.get(item.src);
+    const promise = new Promise((resolve, reject) => {
       const script = document.createElement('script'); script.src = item.src; script.async = false;
+      const timeout = setTimeout(() => { script.remove(); reject(new Error('Script timed out')); }, 30000);
+      script.addEventListener('load', () => clearTimeout(timeout), { once: true });
+      script.addEventListener('error', () => clearTimeout(timeout), { once: true });
       script.onload = () => item.global && !hasGlobal(item.global) ? reject(new Error('Library unavailable')) : resolve();
       script.onerror = () => reject(new Error('Script unavailable'));
       document.head.appendChild(script);
     });
+    scripts.set(item.src, promise);
+    promise.catch(() => scripts.delete(item.src));
+    return promise;
+  }
+  function asset(path) { return new URL(location.protocol === 'file:' ? path : '/' + path, location.href).href; }
+  async function preparePage(key) {
+    const config = JSON.parse(document.getElementById('homeEntryAssets').textContent);
+    for (const vendor of config.pages[key] || []) {
+      try { await loadScript(vendor); } catch (error) { if (vendor.required) throw error; }
+    }
   }
   function ensureResources() {
     if (resourcePromise) return resourcePromise;
@@ -213,10 +234,10 @@
       const config = JSON.parse(document.getElementById('homeEntryAssets').textContent);
       await Promise.all(Array.from(styles.values()));
       if (!getComputedStyle(root).getPropertyValue('--color-pink-primary').trim()) throw new Error('Stylesheet not applied');
-      for (const vendor of config.vendors) {
-        try { await loadScript(vendor); } catch (error) { if (vendor.required) throw error; }
-      }
-      await loadScript({ src: config.theme });
+      await preparePage(document.body.dataset.sitePage);
+      if (isPhone()) await loadScript({ src: asset('assets/mobile-site-session.js') });
+      await loadScript({ src: asset('assets/merch-pages.js') });
+      await loadScript({ src: asset(config.theme) });
       if (!initializer) throw new Error('Homepage startup unavailable');
     };
     resourcePromise = Promise.race([load(), new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Startup timed out')), 30000); })])
@@ -236,7 +257,7 @@
           video.src = video.dataset.homeVideoSrc; video.autoplay = true;
         });
         started = true;
-        initializer();
+        if (window.OogaMobileSite) window.OogaMobileSite.start(); else initializer();
         root.dataset.homeStarted = 'true';
         updateLayout();
       } catch (_) { failed = true; showCover('error'); return; }
@@ -326,16 +347,30 @@
     button = dialog.querySelector('button');
     button.addEventListener('click', requestLandscape);
     dialog.addEventListener('keydown', event => {
+      if (event.key === 'Escape') { event.preventDefault(); exitLandscape(); }
       if (event.key === 'Tab') {
         event.preventDefault();
         (button.disabled ? dialog : button).focus({ preventScroll: true });
       }
     });
-    dialog.addEventListener('cancel', event => { event.preventDefault(); exitLandscape(); });
+    dialog.addEventListener('cancel', event => {
+      event.preventDefault();
+      if (window.OogaMobileSite && window.OogaMobileSite.activePage) window.OogaMobileSite.exitSite();
+      else {
+        requestId++; pending = false; releaseLandscape();
+        const position = history.state?.oogaSite?.position;
+        history.go(-(Number.isInteger(position) && position >= 0 ? position + 1 : 1));
+        setTimeout(() => { if (active && !allowed()) { exitMessage = true; render(); } }, 1500);
+      }
+    });
     if (isPhone()) showCover(allowed() ? 'loading' : 'waiting'); else gate.hidden = true;
   }
   setInitialState();
-  window.OogaHomeEntry = { attach, prepareStyles, register: fn => { initializer = fn; schedule(); }, isLandscape: landscapeConfirmed };
+  window.OogaSiteEntry = { attach, prepareStyles, preparePage, register: fn => { initializer = fn; schedule(); }, isLandscape: landscapeConfirmed,
+    refreshLayout: () => { updateLayout(); render(); if (dialog?.open) rememberInert(); schedule(); },
+    releaseLandscape: () => { requestId++; pending = false; return releaseLandscape(); },
+    exitUnavailable: () => { exitMessage = true; render(); }
+  };
   portrait.addEventListener('change', schedule); landscape.addEventListener('change', schedule);
   window.addEventListener('resize', schedule, { passive: true });
   if (window.screen.orientation && window.screen.orientation.addEventListener) window.screen.orientation.addEventListener('change', schedule);
@@ -354,20 +389,127 @@
   if (document.fonts) document.fonts.addEventListener('loadingdone', schedule);
 })();
 </script>
-<!-- /HOMEPAGE ENTRY HEAD -->
+<!-- /STATIC SITE ENTRY HEAD -->
 
-  <!-- Homepage resources: the entry controller activates these after rotation. -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link data-home-font media="print" href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@400;600;700&family=Luckiest+Guy&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Shrikhand&display=swap" rel="stylesheet">
-  <link data-home-style media="print" rel="stylesheet" href="assets/theme.css?v=home-entry-1">
-  <script>window.OogaHomeEntry.prepareStyles();</script>
-  <noscript><link rel="stylesheet" href="assets/theme.css?v=home-entry-1" media="not all and (hover: none) and (pointer: coarse) and (max-width: 600px) and (orientation: portrait)"></noscript>
-  <script id="homeEntryAssets" type="application/json">{"vendors":[{"src":"https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js","global":"THREE","required":true},{"src":"https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js","global":"THREE.GLTFLoader","required":true},{"src":"https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js","global":"gsap","required":false},{"src":"https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js","global":"ScrollTrigger","required":false}],"theme":"assets/theme.js"}</script>
+  <link data-home-style media="print" rel="stylesheet" href="assets/theme.css">
+  <script>window.OogaSiteEntry.prepareStyles();</script>
+  <noscript><link rel="stylesheet" href="assets/theme.css" media="not all and (hover: none) and (pointer: coarse) and (max-width: 600px) and (orientation: portrait)"></noscript>
+
+
+
+<style id="siteSessionStyles">
+/* Mobile document navigation. These rules never match desktop or Shopify. */
+body.site-phone:not(.template-index) {
+  overflow-x: clip;
+  --home-safe-left: max(12px, env(safe-area-inset-left, 0px));
+  --home-safe-right: max(12px, env(safe-area-inset-right, 0px));
+}
+
+.site-phone:not(.template-index) .site-header {
+  padding: 4px var(--home-safe-right) 4px var(--home-safe-left);
+}
+.site-phone:not(.template-index) .header-container {
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  gap: 6px;
+  min-height: 40px;
+}
+.site-phone:not(.template-index) .logo-wrapper { min-width: 0; }
+.site-phone:not(.template-index) .brand-logo-text {
+  font-size: clamp(18px, 3.7vw, 24px);
+  gap: 4px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.site-phone:not(.template-index) .brand-logo-text span { letter-spacing: 0; }
+.site-phone:not(.template-index) .header-actions { gap: 6px; flex-shrink: 0; }
+.site-phone:not(.template-index) .btn-header-order,
+.site-phone:not(.template-index) .btn-header-cart,
+.site-phone:not(.template-index) .home-menu-toggle {
+  min-height: 36px;
+  padding: 6px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.site-phone:not(.template-index) .cart-btn-badge {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  min-width: 22px;
+}
+.site-phone:not(.template-index) .home-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,.45);
+  border-radius: 999px;
+  color: #fff;
+  background: #45205e;
+  font-family: var(--font-fun);
+  font-weight: 700;
+  cursor: pointer;
+}
+.site-phone:not(.template-index) .main-nav-wrapper {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: var(--home-safe-left);
+  right: var(--home-safe-right);
+  max-height: calc(100dvh - 64px);
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 0 0 16px 16px;
+  background: #261236;
+  box-shadow: 0 12px 28px rgba(0,0,0,.5);
+}
+.site-phone:not(.template-index).home-menu-open .main-nav-wrapper { display: block; }
+.site-phone:not(.template-index) .main-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 12px;
+}
+.site-phone:not(.template-index) .main-nav .nav-link {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  font-size: 16px;
+  padding: 6px 10px;
+}
+.site-phone:not(.template-index) .home-landscape-exit {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #6eefe2;
+  font-family: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+#siteNavigationStatus[hidden] { display: none; }
+#siteNavigationStatus { position: fixed; z-index: 10010; top: calc(56px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 24px); box-sizing: border-box; display: flex; align-items: center; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 10px 16px; border: 1px solid #62eee0; border-radius: 16px; background: #230f33; color: #fff; font: 600 14px/1.4 system-ui, sans-serif; box-shadow: 0 8px 24px #0006; }
+#siteNavigationStatus button { min-height: 36px; padding: 6px 12px; border-radius: 18px; border: 1px solid #ffffff80; background: #c1287a; color: #fff; font: inherit; cursor: pointer; }
+html[data-site-swapping] body > :not(#homeEntryScreen):not(#siteNavigationStatus) { visibility: hidden !important; }
+.site-phone:not(.template-index) { overflow-x: clip; }
+.site-phone:not(.template-index) .product-page-main { padding-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px)); }
+.site-phone:not(.template-index) .product-hero-box > *, .site-phone:not(.template-index) .ts-inner { min-width: 0; }
+.site-phone:not(.template-index) .footer-container { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.site-phone:not(.template-index) .footer-container > div { min-width: 0; }
+.site-phone:not(.template-index) .footer-container > div:first-child { grid-column: 1 / -1; }
+.site-phone:not(.template-index) .footer-form { min-width: 0; flex-wrap: wrap; }
+.site-phone:not(.template-index) .footer-email-input { min-width: 0; font-size: 16px; }
+.site-phone:not(.template-index) .cart-drawer { height: 100dvh; }
+</style>
+<script id="homeEntryAssets" type="application/json">{"pages":{"home":[{"src":"https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js","global":"THREE","required":true},{"src":"https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js","global":"THREE.GLTFLoader","required":true},{"src":"https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js","global":"gsap","required":false},{"src":"https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js","global":"ScrollTrigger","required":false}],"book":[{"src":"https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js","global":"THREE","required":true},{"src":"https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js","global":"THREE.GLTFLoader","required":true}],"tshirt":[],"plushie":[]},"theme":"assets/theme.js"}</script>
 </head>
 
-<body class="template-index">
-<!-- HOMEPAGE ENTRY SCREEN -->
+<body class="template-index" data-site-page="home">
+<!-- STATIC SITE ENTRY SCREEN -->
 <div id="homeEntryScreen">
   <dialog class="home-orientation-hint" id="homeOrientationHint" tabindex="-1" aria-labelledby="homeOrientationTitle" aria-describedby="homeOrientationMessage">
     <h2 id="homeOrientationTitle">Best viewed in landscape</h2>
@@ -376,10 +518,35 @@
     <noscript><p>Enable JavaScript to use the interactive homepage.</p></noscript>
   </dialog>
 </div>
-<script>window.OogaHomeEntry.attach();</script>
-<!-- /HOMEPAGE ENTRY SCREEN -->
+<script>window.OogaSiteEntry.attach();</script>
+<!-- /STATIC SITE ENTRY SCREEN -->
 
-  <div class="vintage-grain-overlay"></div>
+<template id="siteCartTemplate"><div class="cart-drawer-overlay" id="cartOverlay"></div>
+
+  <div class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-label="Shopping Cart">
+    <div class="cart-drawer-header">
+      <div class="cart-drawer-title">🛒 Your Cart</div>
+      <button type="button" class="cart-close-btn" id="closeCartBtn" aria-label="Close cart">✕</button>
+    </div>
+
+    <div class="cart-drawer-body" id="cartDrawerItems"></div>
+
+    <div class="cart-drawer-footer">
+      <div class="cart-shipping-notice">
+        🎉 You qualify for FREE Tracked Shipping!
+      </div>
+
+      <div class="cart-subtotal-row">
+        <span>Subtotal:</span>
+        <span id="cartSubtotalAmount">>4.99</span>
+      </div>
+
+      <button type="button" class="btn-cartoon btn-cart-checkout" onclick="alert('Proceeding to Shopify Secure Checkout!')">
+        🔒 Secure Checkout
+      </button>
+    </div>
+  </div></template>
+<div class="vintage-grain-overlay"></div>
 
   <!-- SITE HEADER -->
   <header class="site-header" id="SiteHeader">
@@ -656,7 +823,7 @@
              ====================================================================== -->
       <section class="psd-section psd-section-storefront" id="village-shopfront"
         aria-label="Village Storefront Merchandise">
-        
+
         <!-- LAYER 1: Background Walls (Textured pink, teal, yellow architectural panels) -->
         <div class="layer s3-layer" id="s3-l1-walls">
           <img src="assets/images/parallax/section 3/Ooga.Booga.Website.Homepag 01.png" alt="Storefront Background Walls">

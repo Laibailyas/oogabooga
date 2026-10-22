@@ -1,0 +1,381 @@
+<!-- STATIC SITE ENTRY HEAD: canonical block for the four Vercel documents. -->
+<style id="homeEntryCritical">
+  #homeEntryScreen { display: none; }
+  html[data-home-entry="waiting"], html[data-home-entry="loading"], html[data-home-entry="error"] { overflow: hidden; }
+  html[data-home-entry="waiting"] body, html[data-home-entry="loading"] body, html[data-home-entry="error"] body { overflow: hidden; }
+  html[data-home-entry="waiting"] body > :not(#homeEntryScreen),
+  html[data-home-entry="loading"] body > :not(#homeEntryScreen),
+  html[data-home-entry="error"] body > :not(#homeEntryScreen) { visibility: hidden !important; }
+  html:not([data-home-started]):not([data-home-measuring])[data-home-entry="waiting"] body > :not(#homeEntryScreen),
+  html:not([data-home-started]):not([data-home-measuring])[data-home-entry="loading"] body > :not(#homeEntryScreen),
+  html:not([data-home-started]):not([data-home-measuring])[data-home-entry="error"] body > :not(#homeEntryScreen) { display: none !important; }
+  html[data-home-entry="waiting"] #homeEntryScreen,
+  html[data-home-entry="loading"] #homeEntryScreen,
+  html[data-home-entry="error"] #homeEntryScreen { display: flex; }
+  #homeEntryScreen {
+    position: fixed; inset: 0; z-index: 2147483646; overflow: auto;
+    align-items: center; justify-content: center; box-sizing: border-box;
+    padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+    background: #13091f;
+    background-image: radial-gradient(ellipse at 12% 20%, #7b205d 0%, transparent 55%), radial-gradient(ellipse at 86% 76%, #087675 0%, transparent 58%), radial-gradient(ellipse at 65% 8%, #35326c 0%, transparent 48%);
+    overscroll-behavior: contain;
+  }
+  #homeEntryScreen #homeOrientationHint {
+    display: flex; flex-direction: column; align-items: stretch; gap: 14px;
+    position: fixed; inset: 0; margin: auto; box-sizing: border-box;
+    width: min(340px, calc(100% - max(16px, env(safe-area-inset-left, 0px)) - max(16px, env(safe-area-inset-right, 0px))));
+    height: fit-content; max-height: calc(100dvh - max(16px, env(safe-area-inset-top, 0px)) - max(16px, env(safe-area-inset-bottom, 0px)));
+    overflow-y: auto; overscroll-behavior: contain; padding: 24px;
+    border: 1px solid #62eee0; border-radius: 20px; color: #fff; background: #230f33;
+    box-shadow: 0 16px 48px rgba(0,0,0,.55); text-align: center;
+    font: 600 16px/1.5 'Fredoka', system-ui, sans-serif;
+  }
+  #homeEntryScreen #homeOrientationHint h2 { margin: 0; color: #6eefe2; font: 700 21px/1.25 'Fredoka', system-ui, sans-serif; }
+  #homeEntryScreen #homeOrientationHint p { margin: 0; }
+  #homeEntryScreen #homeOrientationHint button {
+    box-sizing: border-box; min-width: 112px; min-height: 44px; align-self: center;
+    padding: 8px 24px; border: 1px solid rgba(255,255,255,.5); border-radius: 999px;
+    background: linear-gradient(135deg, #ff4081, #b32579); color: #fff;
+    font: 700 16px/1.5 'Fredoka', system-ui, sans-serif; cursor: pointer;
+  }
+  #homeEntryScreen #homeOrientationHint button:disabled { cursor: wait; opacity: .8; }
+  #homeOrientationHint::backdrop { background: rgba(8,3,17,.22); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  #homeEntryScreen noscript { font-size: 14px; }
+  /* This rule protects the first paint and the frame before any resize handler runs. */
+  @media (hover: none) and (pointer: coarse) and (max-width: 600px) and (orientation: portrait) {
+    html, body { overflow: hidden; }
+    body > :not(#homeEntryScreen) { visibility: hidden !important; }
+    html:not([data-home-started]):not([data-home-measuring]) body > :not(#homeEntryScreen) { display: none !important; }
+    #homeEntryScreen { display: flex !important; }
+  }
+</style>
+<script id="homeEntryBootstrap">
+(function () {
+  'use strict';
+  if (window.OogaSiteEntry) return;
+  const root = document.documentElement;
+  const portrait = matchMedia('(hover: none) and (pointer: coarse) and (max-width: 600px) and (orientation: portrait)');
+  const landscape = matchMedia('(hover: none) and (pointer: coarse) and (max-width: 1024px) and (max-height: 600px) and (orientation: landscape)');
+  const styles = new Map();
+  const scripts = new Map();
+  let exitMessage = false;
+  const inertElements = new Map();
+  let gate, dialog, button, initializer;
+  let domReady = false, resourcePromise, resourcesReady = false, started = false, failed = false;
+  let active = true, scheduled = false, revision = 0, lastMode = '';
+  let pending = false, fallback = false, requestId = 0, ownsFullscreen = false, ownsOrientation = false, lockTimer;
+  let focusBefore = null, scrollBefore = null, wasCovered = false, initialPhoneCover = false;
+  const isPhone = () => portrait.matches || landscape.matches;
+  function landscapeConfirmed() {
+    if (!landscape.matches) return false;
+    const type = window.screen.orientation && window.screen.orientation.type;
+    if (type) return type.indexOf('landscape') === 0;
+    if (typeof window.orientation === 'number') return Math.abs(window.orientation) === 90;
+    return true;
+  }
+  const allowed = () => !isPhone() || landscapeConfirmed();
+  function setInitialState() {
+    const phone = isPhone();
+    initialPhoneCover = phone;
+    root.dataset.homeEntry = phone ? (allowed() ? 'loading' : 'waiting') : 'ready';
+  }
+  function updateLayout() {
+    if (!document.body) return;
+    const phone = isPhone(), wide = phone && landscape.matches;
+    document.body.classList.toggle('site-phone', phone);
+    document.body.classList.toggle('home-phone', phone);
+    document.body.classList.toggle('home-landscape', wide);
+    root.classList.toggle('home-phone-page', phone);
+    const mode = phone ? (wide ? 'landscape' : 'portrait') : 'desktop';
+    if (lastMode !== mode) closeMenu(false);
+    lastMode = mode;
+    window.dispatchEvent(new Event('homepage:layout'));
+    if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+  }
+  function closeMenu(focus) {
+    if (!document.body) return;
+    const toggle = document.querySelector('.home-menu-toggle');
+    document.body.classList.remove('home-menu-open');
+    if (toggle) { toggle.setAttribute('aria-expanded', 'false'); if (focus) toggle.focus({ preventScroll: true }); }
+  }
+  function rememberInert() {
+    if (!document.body) return;
+    Array.from(document.body.children).forEach(el => {
+      if (el === gate || /^(SCRIPT|STYLE|LINK)$/.test(el.tagName)) return;
+      if (!inertElements.has(el)) inertElements.set(el, [el.inert, el.getAttribute('aria-hidden')]);
+      el.inert = true; el.setAttribute('aria-hidden', 'true');
+    });
+  }
+  function restoreInert() {
+    inertElements.forEach(([inert, hidden], el) => {
+      el.inert = inert;
+      if (hidden === null) el.removeAttribute('aria-hidden'); else el.setAttribute('aria-hidden', hidden);
+    });
+    inertElements.clear();
+  }
+  function render() {
+    if (!dialog) return;
+    const rotating = pending && !allowed();
+    const loading = allowed() && !failed;
+    dialog.querySelector('h2').textContent = failed ? 'Unable to load the website' : fallback && !loading ? 'Please rotate your phone' : 'Best viewed in landscape';
+    dialog.querySelector('p').textContent = failed ? 'We couldn’t load the website. Please check your connection and try again.'
+      : exitMessage && !loading ? 'There is no earlier page to return to. Rotate your phone to continue, or use your browser’s controls to leave.'
+      : rotating ? 'Switching to landscape…' : loading ? 'Loading landscape view…'
+        : fallback ? 'We couldn’t switch to landscape automatically. Please turn your phone sideways to continue.'
+          : 'Rotate your phone for the best viewing experience.';
+    button.textContent = failed ? 'Reload' : fallback && !loading ? 'Try again' : 'OK';
+    button.disabled = !failed && (rotating || loading);
+    dialog.setAttribute('aria-busy', String(!failed && (rotating || loading)));
+    const exit = document.querySelector('.home-landscape-exit-item');
+    if (exit) exit.hidden = !isPhone() || !(ownsFullscreen || ownsOrientation);
+  }
+  function showCover(state) {
+    root.dataset.homeEntry = state;
+    if (!gate || !dialog) return;
+    if (!wasCovered) {
+      focusBefore = document.activeElement;
+      if (started) scrollBefore = window.scrollY;
+    }
+    wasCovered = true;
+    gate.hidden = false;
+    rememberInert(); render();
+    if (!dialog.open && typeof dialog.showModal === 'function') {
+      try { dialog.showModal(); } catch (_) { /* The CSS entry screen remains available. */ }
+    }
+    if (!button.disabled && !dialog.contains(document.activeElement)) button.focus({ preventScroll: true });
+  }
+  function reveal() {
+    if (!active || !allowed() || failed || !started) return;
+    root.dataset.homeEntry = 'ready';
+    restoreInert();
+    if (dialog && dialog.open) dialog.close();
+    if (gate) gate.hidden = true;
+    root.classList.remove('home-orientation-open', 'home-orientation-handoff');
+    if (scrollBefore !== null) window.scrollTo({ top: scrollBefore, behavior: 'instant' });
+    else if (initialPhoneCover && location.hash) {
+      try { const target = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (target) target.scrollIntoView({ behavior: 'instant' }); } catch (_) { /* Invalid fragments are harmless. */ }
+    }
+    initialPhoneCover = false; exitMessage = false;
+    let target = focusBefore;
+    const overlay = document.querySelector('.cart-drawer.active, .modal-overlay.active');
+    if (overlay && (!target || !overlay.contains(target))) target = overlay.querySelector('button, a[href], input');
+    if (wasCovered && (!target || target === document.body || !target.isConnected || !target.getClientRects().length)) target = document.querySelector('.home-menu-toggle');
+    if (wasCovered && target) {
+      // Button visibility transitions settle after the cover is removed.
+      requestAnimationFrame(() => {
+        if (active && allowed() && root.dataset.homeEntry === 'ready' && target.isConnected) target.focus({ preventScroll: true });
+      });
+    }
+    focusBefore = null; scrollBefore = null; wasCovered = false;
+  }
+  function prepareStyles() {
+    document.querySelectorAll('link[data-home-style]').forEach(link => {
+      const expected = asset('assets/theme.css');
+      if (link.href.split('?')[0] !== expected) link.href = expected;
+      if (!styles.has(link)) {
+        const ready = new Promise((resolve, reject) => {
+          link.addEventListener('load', resolve, { once: true });
+          link.addEventListener('error', () => {
+            // A failed font @import can emit an error even when the theme sheet loaded.
+            link.media = 'all';
+            requestAnimationFrame(() => {
+              if (link.sheet && getComputedStyle(root).getPropertyValue('--color-pink-primary').trim()) resolve();
+              else reject(new Error('Stylesheet unavailable'));
+            });
+          }, { once: true });
+        });
+        // The phone can remain in portrait long before startup consumes this promise.
+        ready.catch(() => {});
+        styles.set(link, ready);
+      }
+    });
+    if (allowed()) document.querySelectorAll('link[data-home-style],link[data-home-font]').forEach(link => { link.media = 'all'; });
+  }
+  function hasGlobal(name) { return name.split('.').reduce((value, part) => value && value[part], window); }
+  function loadScript(item) {
+    if (item.global && hasGlobal(item.global)) return Promise.resolve();
+    if (scripts.has(item.src)) return scripts.get(item.src);
+    const promise = new Promise((resolve, reject) => {
+      const script = document.createElement('script'); script.src = item.src; script.async = false;
+      const timeout = setTimeout(() => { script.remove(); reject(new Error('Script timed out')); }, 30000);
+      script.addEventListener('load', () => clearTimeout(timeout), { once: true });
+      script.addEventListener('error', () => clearTimeout(timeout), { once: true });
+      script.onload = () => item.global && !hasGlobal(item.global) ? reject(new Error('Library unavailable')) : resolve();
+      script.onerror = () => reject(new Error('Script unavailable'));
+      document.head.appendChild(script);
+    });
+    scripts.set(item.src, promise);
+    promise.catch(() => scripts.delete(item.src));
+    return promise;
+  }
+  function asset(path) { return new URL(location.protocol === 'file:' ? path : '/' + path, location.href).href; }
+  async function preparePage(key) {
+    const config = JSON.parse(document.getElementById('homeEntryAssets').textContent);
+    for (const vendor of config.pages[key] || []) {
+      try { await loadScript(vendor); } catch (error) { if (vendor.required) throw error; }
+    }
+  }
+  function ensureResources() {
+    if (resourcePromise) return resourcePromise;
+    prepareStyles();
+    let timer;
+    const load = async () => {
+      const config = JSON.parse(document.getElementById('homeEntryAssets').textContent);
+      await Promise.all(Array.from(styles.values()));
+      if (!getComputedStyle(root).getPropertyValue('--color-pink-primary').trim()) throw new Error('Stylesheet not applied');
+      await preparePage(document.body.dataset.sitePage);
+      if (isPhone()) await loadScript({ src: asset('assets/mobile-site-session.js') });
+      await loadScript({ src: asset('assets/merch-pages.js') });
+      await loadScript({ src: asset(config.theme) });
+      if (!initializer) throw new Error('Homepage startup unavailable');
+    };
+    resourcePromise = Promise.race([load(), new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Startup timed out')), 30000); })])
+      .then(() => { resourcesReady = true; schedule(); })
+      .catch(() => { failed = true; requestId++; pending = false; releaseLandscape(); showCover('error'); })
+      .finally(() => clearTimeout(timer));
+    return resourcePromise;
+  }
+  function startOrReveal() {
+    if (!active || !domReady || !allowed() || failed) return;
+    if (!resourcesReady) { ensureResources(); return; }
+    root.dataset.homeMeasuring = 'true';
+    updateLayout();
+    if (!started) {
+      try {
+        document.querySelectorAll('video[data-home-video-src]').forEach(video => {
+          video.src = video.dataset.homeVideoSrc; video.autoplay = true;
+        });
+        started = true;
+        if (window.OogaMobileSite) window.OogaMobileSite.start(); else initializer();
+        root.dataset.homeStarted = 'true';
+        updateLayout();
+      } catch (_) { failed = true; showCover('error'); return; }
+    }
+    const current = revision;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (current !== revision || !active || !allowed() || failed) return;
+      reveal();
+    }));
+  }
+  function clearLockTimer() { clearTimeout(lockTimer); lockTimer = null; }
+  function unlock() { try { window.screen.orientation.unlock(); } catch (_) { /* Already unlocked or unsupported. */ } }
+  function releaseLandscape() {
+    const exit = ownsFullscreen && document.fullscreenElement === root;
+    const locked = ownsOrientation;
+    ownsFullscreen = false; ownsOrientation = false; clearLockTimer();
+    if (locked) unlock();
+    render();
+    if (exit) { try { return Promise.resolve(document.exitFullscreen()).catch(() => {}); } catch (_) { /* Already exited. */ } }
+    return Promise.resolve();
+  }
+  function exitLandscape() {
+    requestId++; pending = false; fallback = false;
+    closeMenu(allowed() && document.body.classList.contains('home-menu-open'));
+    releaseLandscape(); schedule();
+  }
+  function raiseDialog() {
+    if (dialog && dialog.open) { dialog.close(); try { dialog.showModal(); } catch (_) { /* CSS cover stays in place. */ } }
+    root.classList.remove('home-orientation-handoff');
+  }
+  async function requestFailed(id) {
+    if (id !== requestId) return;
+    await releaseLandscape();
+    if (id !== requestId) return;
+    pending = false; fallback = !allowed(); render(); schedule();
+  }
+  async function requestLandscape() {
+    if (failed) { location.reload(); return; }
+    if (pending || allowed()) return;
+    const orientation = window.screen.orientation;
+    if (!orientation || typeof orientation.lock !== 'function' || typeof root.requestFullscreen !== 'function' || document.fullscreenEnabled === false || (document.fullscreenElement && document.fullscreenElement !== root)) {
+      fallback = true; render(); return;
+    }
+    const id = ++requestId; let requestedFullscreen = false, requestedLock = false;
+    pending = true; fallback = false; render();
+    try {
+      if (!document.fullscreenElement) {
+        requestedFullscreen = true; ownsFullscreen = true; root.classList.add('home-orientation-handoff');
+        await root.requestFullscreen();
+        if (id !== requestId) {
+          if (!pending && document.fullscreenElement === root && !ownsFullscreen) await document.exitFullscreen().catch(() => {});
+          return;
+        }
+        raiseDialog();
+      }
+      requestedLock = true; ownsOrientation = true; render();
+      await orientation.lock('landscape');
+      if (id !== requestId) { if (!pending && !ownsOrientation) unlock(); return; }
+      clearLockTimer();
+      lockTimer = setTimeout(() => { if (id === requestId && !allowed()) requestFailed(id); }, 5000);
+      schedule();
+    } catch (_) {
+      if (id === requestId) await requestFailed(id);
+      else if (!pending) {
+        if (requestedLock && !ownsOrientation) unlock();
+        if (requestedFullscreen && document.fullscreenElement === root && !ownsFullscreen) document.exitFullscreen().catch(() => {});
+      }
+    } finally { if (id === requestId) root.classList.remove('home-orientation-handoff'); }
+  }
+  function update() {
+    scheduled = false;
+    if (!active) return;
+    revision++;
+    if (!isPhone() && (pending || ownsFullscreen || ownsOrientation)) { requestId++; pending = false; releaseLandscape(); }
+    updateLayout();
+    if (failed) { showCover('error'); return; }
+    if (!allowed()) { showCover('waiting'); return; }
+    pending = false; clearLockTimer();
+    if ((!started && isPhone()) || wasCovered) showCover('loading');
+    render(); startOrReveal();
+  }
+  function schedule() { if (!scheduled) { scheduled = true; requestAnimationFrame(update); } }
+  function attach() {
+    if (gate) return;
+    gate = document.getElementById('homeEntryScreen'); dialog = document.getElementById('homeOrientationHint');
+    if (!gate || !dialog) return;
+    button = dialog.querySelector('button');
+    button.addEventListener('click', requestLandscape);
+    dialog.addEventListener('keydown', event => {
+      if (event.key === 'Escape') { event.preventDefault(); exitLandscape(); }
+      if (event.key === 'Tab') {
+        event.preventDefault();
+        (button.disabled ? dialog : button).focus({ preventScroll: true });
+      }
+    });
+    dialog.addEventListener('cancel', event => {
+      event.preventDefault();
+      if (window.OogaMobileSite && window.OogaMobileSite.activePage) window.OogaMobileSite.exitSite();
+      else {
+        requestId++; pending = false; releaseLandscape();
+        const position = history.state?.oogaSite?.position;
+        history.go(-(Number.isInteger(position) && position >= 0 ? position + 1 : 1));
+        setTimeout(() => { if (active && !allowed()) { exitMessage = true; render(); } }, 1500);
+      }
+    });
+    if (isPhone()) showCover(allowed() ? 'loading' : 'waiting'); else gate.hidden = true;
+  }
+  setInitialState();
+  window.OogaSiteEntry = { attach, prepareStyles, preparePage, register: fn => { initializer = fn; schedule(); }, isLandscape: landscapeConfirmed,
+    refreshLayout: () => { updateLayout(); render(); if (dialog?.open) rememberInert(); schedule(); },
+    releaseLandscape: () => { requestId++; pending = false; return releaseLandscape(); },
+    exitUnavailable: () => { exitMessage = true; render(); }
+  };
+  portrait.addEventListener('change', schedule); landscape.addEventListener('change', schedule);
+  window.addEventListener('resize', schedule, { passive: true });
+  if (window.screen.orientation && window.screen.orientation.addEventListener) window.screen.orientation.addEventListener('change', schedule);
+  window.addEventListener('orientationchange', schedule);
+  matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', schedule);
+  document.addEventListener('DOMContentLoaded', () => { domReady = true; attach(); update(); }, { once: true });
+  document.addEventListener('click', event => { if (event.target.closest('.home-landscape-exit')) exitLandscape(); });
+  document.addEventListener('keydown', event => { if (event.key === 'Escape' && (!dialog || !dialog.open) && (ownsFullscreen || ownsOrientation)) exitLandscape(); });
+  document.addEventListener('fullscreenchange', () => {
+    if (document.fullscreenElement === root) { if (ownsFullscreen) raiseDialog(); }
+    else if (ownsFullscreen || ownsOrientation) exitLandscape();
+    schedule();
+  });
+  window.addEventListener('pagehide', () => { active = false; revision++; requestId++; pending = false; releaseLandscape(); });
+  window.addEventListener('pageshow', () => { active = true; schedule(); });
+  if (document.fonts) document.fonts.addEventListener('loadingdone', schedule);
+})();
+</script>
+<!-- /STATIC SITE ENTRY HEAD -->

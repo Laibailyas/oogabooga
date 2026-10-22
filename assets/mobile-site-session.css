@@ -1,0 +1,104 @@
+
+/* Mobile document navigation. These rules never match desktop or Shopify. */
+body.site-phone:not(.template-index) {
+  overflow-x: clip;
+  --home-safe-left: max(12px, env(safe-area-inset-left, 0px));
+  --home-safe-right: max(12px, env(safe-area-inset-right, 0px));
+}
+
+.site-phone:not(.template-index) .site-header {
+  padding: 4px var(--home-safe-right) 4px var(--home-safe-left);
+}
+.site-phone:not(.template-index) .header-container {
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  gap: 6px;
+  min-height: 40px;
+}
+.site-phone:not(.template-index) .logo-wrapper { min-width: 0; }
+.site-phone:not(.template-index) .brand-logo-text {
+  font-size: clamp(18px, 3.7vw, 24px);
+  gap: 4px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.site-phone:not(.template-index) .brand-logo-text span { letter-spacing: 0; }
+.site-phone:not(.template-index) .header-actions { gap: 6px; flex-shrink: 0; }
+.site-phone:not(.template-index) .btn-header-order,
+.site-phone:not(.template-index) .btn-header-cart,
+.site-phone:not(.template-index) .home-menu-toggle {
+  min-height: 36px;
+  padding: 6px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.site-phone:not(.template-index) .cart-btn-badge {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  min-width: 22px;
+}
+.site-phone:not(.template-index) .home-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,.45);
+  border-radius: 999px;
+  color: #fff;
+  background: #45205e;
+  font-family: var(--font-fun);
+  font-weight: 700;
+  cursor: pointer;
+}
+.site-phone:not(.template-index) .main-nav-wrapper {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: var(--home-safe-left);
+  right: var(--home-safe-right);
+  max-height: calc(100dvh - 64px);
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 0 0 16px 16px;
+  background: #261236;
+  box-shadow: 0 12px 28px rgba(0,0,0,.5);
+}
+.site-phone:not(.template-index).home-menu-open .main-nav-wrapper { display: block; }
+.site-phone:not(.template-index) .main-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 12px;
+}
+.site-phone:not(.template-index) .main-nav .nav-link {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  font-size: 16px;
+  padding: 6px 10px;
+}
+.site-phone:not(.template-index) .home-landscape-exit {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #6eefe2;
+  font-family: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+#siteNavigationStatus[hidden] { display: none; }
+#siteNavigationStatus { position: fixed; z-index: 10010; top: calc(56px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 24px); box-sizing: border-box; display: flex; align-items: center; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 10px 16px; border: 1px solid #62eee0; border-radius: 16px; background: #230f33; color: #fff; font: 600 14px/1.4 system-ui, sans-serif; box-shadow: 0 8px 24px #0006; }
+#siteNavigationStatus button { min-height: 36px; padding: 6px 12px; border-radius: 18px; border: 1px solid #ffffff80; background: #c1287a; color: #fff; font: inherit; cursor: pointer; }
+html[data-site-swapping] body > :not(#homeEntryScreen):not(#siteNavigationStatus) { visibility: hidden !important; }
+.site-phone:not(.template-index) { overflow-x: clip; }
+.site-phone:not(.template-index) .product-page-main { padding-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px)); }
+.site-phone:not(.template-index) .product-hero-box > *, .site-phone:not(.template-index) .ts-inner { min-width: 0; }
+.site-phone:not(.template-index) .footer-container { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.site-phone:not(.template-index) .footer-container > div { min-width: 0; }
+.site-phone:not(.template-index) .footer-container > div:first-child { grid-column: 1 / -1; }
+.site-phone:not(.template-index) .footer-form { min-width: 0; flex-wrap: wrap; }
+.site-phone:not(.template-index) .footer-email-input { min-width: 0; font-size: 16px; }
+.site-phone:not(.template-index) .cart-drawer { height: 100dvh; }
