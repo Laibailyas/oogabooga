@@ -20,6 +20,16 @@
       <meta name="description" content="Step into the wild vintage cartoon world of Ooga Booga! Explore the official interactive 3D book, watch the animated short film, and discover coming soon merchandise.">
     {% endif %}
 
+    {% if template.name == 'index' %}
+      {% render 'home-entry-head' %}
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link data-home-font media="print" href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@400;600;700&family=Luckiest+Guy&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Shrikhand&display=swap" rel="stylesheet">
+      <link data-home-style media="print" href="{{ 'theme.css' | asset_url }}" rel="stylesheet">
+      <script>window.OogaHomeEntry.prepareStyles();</script>
+      <noscript><link href="{{ 'theme.css' | asset_url }}" rel="stylesheet" media="not all and (hover: none) and (pointer: coarse) and (max-width: 600px) and (orientation: portrait)"></noscript>
+      <script id="homeEntryAssets" type="application/json">{"vendors":[{"src":"https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js","global":"THREE","required":true},{"src":"https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js","global":"THREE.GLTFLoader","required":true}],"theme":{{ 'theme.js' | asset_url | json }}}</script>
+    {% else %}
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,10 +42,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
+    {% endif %}
+
     {{ content_for_header }}
   </head>
 
   <body class="template-{{ template.name | default: 'index' }}">
+    {% if template.name == 'index' %}{% render 'home-entry-screen' %}{% endif %}
     <div class="vintage-grain-overlay"></div>
 
     {% section 'header' %}
@@ -50,6 +63,6 @@
     {% render 'plushie-modal' %}
 
     <!-- Theme Interactive Script -->
-    {{ 'theme.js' | asset_url | script_tag }}
+    {% unless template.name == 'index' %}{{ 'theme.js' | asset_url | script_tag }}{% endunless %}
   </body>
 </html>

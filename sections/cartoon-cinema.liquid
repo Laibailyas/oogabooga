@@ -18,12 +18,11 @@
       <video 
         id="cinemaVideo" 
         class="s1-video-player"
-        src="{{ 'videos/LANDSCAPE.mp4' | asset_url }}"
+        data-home-video-src="{{ 'videos/LANDSCAPE.mp4' | asset_url }}"
         data-portrait-src="{{ 'videos/PORTRAIT.mp4' | asset_url }}"
         loop 
         playsinline 
         muted 
-        autoplay
         preload="metadata"
       >
         Your browser does not support HTML5 video.

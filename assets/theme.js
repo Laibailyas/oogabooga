@@ -14,273 +14,28 @@
   const isHomeLandscape = () => isHomePhone() && homeLandscapeQuery.matches;
   const reduceHomeMotion = () => isHomePhone() && reducedMotionQuery.matches;
 
+  // Phone layout and orientation are owned by the early homepage bootstrap.
   function initHomepagePhoneLayout() {
     if (!document.body.classList.contains('template-index')) return;
     const header = document.getElementById('SiteHeader');
     const menu = header && header.querySelector('.home-menu-toggle');
     const nav = document.getElementById('homeMobileNav');
-    const hint = document.getElementById('homeOrientationHint');
-    const root = document.documentElement;
-    const hintButton = hint && hint.querySelector('button');
-    const exitItem = nav && nav.querySelector('.home-landscape-exit-item');
-    // An old OK dismissal must not bypass the new orientation request.
-    const exitKey = 'ooga.home.landscapeExplicitExit.v1';
-    let portraitAllowed = false;
-    let scheduled = false;
-    let lastMode = '';
-    let focusBeforeHint = null;
-    let hintState = 'initial';
-    let requestId = 0;
-    let requestPending = false;
-    let ownsFullscreen = false;
-    let ownsOrientation = false;
-    let orientationTimer = null;
-    let layoutRevision = 0;
-    let pageActive = true;
-    try { portraitAllowed = sessionStorage.getItem(exitKey) === '1'; } catch (_) { /* Storage is optional. */ }
-
-    function renderHint() {
-      if (!hint) return;
-      const fallback = hintState === 'fallback';
-      hint.querySelector('h2').textContent = fallback ? 'Please rotate your phone' : 'Best viewed in landscape';
-      hint.querySelector('p').textContent = hintState === 'requesting'
-        ? 'Switching to landscape…'
-        : fallback ? 'We couldn’t switch to landscape automatically. Please turn your phone sideways to continue.'
-          : 'Rotate your phone for the best viewing experience.';
-      hintButton.textContent = fallback ? 'Try again' : 'OK';
-      hintButton.disabled = hintState === 'requesting';
-      hint.setAttribute('aria-busy', String(hintState === 'requesting'));
-      if (exitItem) exitItem.hidden = !isHomePhone() || !(ownsFullscreen || ownsOrientation);
-    }
-    function clearOrientationTimer() {
-      clearTimeout(orientationTimer);
-      orientationTimer = null;
-    }
-    function unlockOrientation() {
-      try { window.screen.orientation.unlock(); } catch (_) { /* The browser may have already unlocked. */ }
-    }
-    function releaseLandscape() {
-      const exitFullscreen = ownsFullscreen && document.fullscreenElement === root;
-      const unlock = ownsOrientation;
-      ownsFullscreen = false;
-      ownsOrientation = false;
-      clearOrientationTimer();
-      if (unlock) unlockOrientation();
-      renderHint();
-      // Never exit a video player or fullscreen started by another feature.
-      if (exitFullscreen) {
-        try { return Promise.resolve(document.exitFullscreen()).catch(() => {}); } catch (_) { /* Already exited. */ }
-      }
-      return Promise.resolve();
-    }
-
-    function restoreHintFocus() {
-      if (!focusBeforeHint) return;
-      let target = focusBeforeHint;
-      focusBeforeHint = null;
-      const activeOverlay = document.querySelector('.cart-drawer.active, .modal-overlay.active');
-      if (activeOverlay && !activeOverlay.contains(target)) target = activeOverlay.querySelector('button, a[href], input');
-      if (!target || target === document.body || !target.isConnected || !target.getClientRects().length) target = isHomePhone() ? menu : null;
-      if (target) target.focus({ preventScroll: true });
-    }
-    function closeHint() {
-      if (!hint) return;
-      if (hint.open) hint.close();
-      hint.hidden = true;
-      root.classList.remove('home-orientation-open', 'home-orientation-handoff');
-      restoreHintFocus();
-    }
-    function exitLandscape() {
-      portraitAllowed = true;
-      requestId++;
-      requestPending = false;
-      hintState = 'initial';
-      releaseLandscape();
-      closeMenu(document.body.classList.contains('home-menu-open'));
-      closeHint();
-      try { sessionStorage.setItem(exitKey, '1'); } catch (_) { /* Keep the in-memory choice. */ }
-      scheduleLayout();
-    }
-    function updateHint(show) {
-      if (!hint) return;
-      if (!show) { closeHint(); return; }
-      if (hint.open) return;
-      focusBeforeHint = document.activeElement;
-      hint.hidden = false;
-      root.classList.add('home-orientation-open');
-      hint.showModal();
-      hintButton.focus({ preventScroll: true });
-    }
-    function raiseHintAboveFullscreen() {
-      if (hint && hint.open) {
-        // Fullscreen promotes the root to the top layer; promote the modal again.
-        hint.close();
-        hint.showModal();
-      }
-      root.classList.remove('home-orientation-handoff');
-    }
-    async function landscapeFailed(id) {
-      if (id !== requestId) return;
-      await releaseLandscape();
-      if (id !== requestId) return;
-      requestPending = false;
-      hintState = isHomeLandscape() ? 'initial' : 'fallback';
-      root.classList.remove('home-orientation-handoff');
-      renderHint();
-      scheduleLayout();
-    }
-    async function requestLandscape() {
-      if (requestPending || portraitAllowed || !isHomePhone() || isHomeLandscape()) return;
-      const orientation = window.screen.orientation;
-      if (!orientation || typeof orientation.lock !== 'function' ||
-          typeof root.requestFullscreen !== 'function' || document.fullscreenEnabled === false ||
-          (document.fullscreenElement && document.fullscreenElement !== root)) {
-        hintState = 'fallback';
-        renderHint();
-        return;
-      }
-      const id = ++requestId;
-      let requestedFullscreen = false;
-      let requestedLock = false;
-      requestPending = true;
-      hintState = 'requesting';
-      renderHint();
-      try {
-        if (!document.fullscreenElement) {
-          requestedFullscreen = true;
-          ownsFullscreen = true;
-          root.classList.add('home-orientation-handoff');
-          // This call must run directly from the tap, before any await.
-          await root.requestFullscreen();
-          if (id !== requestId) {
-            // A cancelled request can still finish entering fullscreen later.
-            if (!requestPending && document.fullscreenElement === root) {
-              await document.exitFullscreen().catch(() => {});
-            }
-            return;
-          }
-          raiseHintAboveFullscreen();
-        }
-        requestedLock = true;
-        ownsOrientation = true;
-        renderHint();
-        await orientation.lock('landscape');
-        if (id !== requestId) {
-          if (!requestPending && !ownsOrientation) unlockOrientation();
-          return;
-        }
-        requestPending = false;
-        renderHint();
-        scheduleLayout();
-        // A resolved lock does not prove that the viewport has finished rotating.
-        orientationTimer = setTimeout(() => {
-          if (id === requestId && !isHomeLandscape()) landscapeFailed(id);
-        }, 5000);
-      } catch (_) {
-        if (id === requestId) await landscapeFailed(id);
-        else if (!requestPending) {
-          if (requestedLock && !ownsOrientation) unlockOrientation();
-          if (requestedFullscreen && document.fullscreenElement === root && !ownsFullscreen) {
-            document.exitFullscreen().catch(() => {});
-          }
-        }
-      } finally {
-        if (id === requestId) root.classList.remove('home-orientation-handoff');
-      }
-    }
+    if (!menu || !nav) return;
     function closeMenu(returnFocus = false) {
       document.body.classList.remove('home-menu-open');
-      if (menu) menu.setAttribute('aria-expanded', 'false');
-      if (returnFocus && menu) menu.focus();
+      menu.setAttribute('aria-expanded', 'false');
+      if (returnFocus) menu.focus({ preventScroll: true });
     }
-    function updateLayout() {
-      scheduled = false;
-      if (!pageActive) return;
-      const phone = isHomePhone();
-      const landscape = isHomeLandscape();
-      const mode = phone ? (landscape ? 'landscape' : 'portrait') : 'desktop';
-      document.body.classList.toggle('home-phone', phone);
-      document.body.classList.toggle('home-landscape', landscape);
-      document.documentElement.classList.toggle('home-phone-page', phone);
-      if (mode !== lastMode) {
-        closeMenu();
-        lastMode = mode;
-      }
-      if (!phone && (requestPending || ownsFullscreen || ownsOrientation)) {
-        requestId++;
-        requestPending = false;
-        hintState = 'initial';
-        releaseLandscape();
-      }
-      renderHint();
-      const revision = ++layoutRevision;
-      if (!phone || portraitAllowed) updateHint(false);
-      else if (!landscape) updateHint(true);
-      window.dispatchEvent(new Event('homepage:layout'));
-      if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
-      if (phone && landscape && !portraitAllowed) {
-        // Let existing scene/viewer resize handlers settle before revealing them.
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          if (revision !== layoutRevision || !pageActive || !isHomeLandscape()) return;
-          clearOrientationTimer();
-          if (!requestPending) { hintState = 'initial'; renderHint(); }
-          updateHint(false);
-        }));
-      }
-    }
-    function scheduleLayout() {
-      if (!scheduled) { scheduled = true; requestAnimationFrame(updateLayout); }
-    }
-    if (menu && nav) {
-      menu.addEventListener('click', () => {
-        const open = !document.body.classList.contains('home-menu-open');
-        document.body.classList.toggle('home-menu-open', open);
-        menu.setAttribute('aria-expanded', String(open));
-      });
-      nav.addEventListener('click', e => { if (e.target.closest('a')) closeMenu(); });
-      document.addEventListener('click', e => { if (!header.contains(e.target)) closeMenu(); });
-      document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' && document.body.classList.contains('home-menu-open')) closeMenu(true);
-      });
-    }
-    if (hint) {
-      hintButton.addEventListener('click', requestLandscape);
-      hint.addEventListener('cancel', e => { e.preventDefault(); exitLandscape(); });
-      hint.addEventListener('close', () => {
-        if (hint.open) return;
-        hint.hidden = true;
-        root.classList.remove('home-orientation-open', 'home-orientation-handoff');
-        restoreHintFocus();
-      });
-    }
-    if (exitItem) exitItem.querySelector('button').addEventListener('click', exitLandscape);
-    document.addEventListener('fullscreenchange', () => {
-      if (document.fullscreenElement === root) {
-        if (ownsFullscreen) raiseHintAboveFullscreen();
-      } else if (ownsFullscreen || ownsOrientation) {
-        // Browser Back/Escape can leave fullscreen without using our menu.
-        exitLandscape();
-      }
-      scheduleLayout();
+    menu.addEventListener('click', () => {
+      const open = !document.body.classList.contains('home-menu-open');
+      document.body.classList.toggle('home-menu-open', open);
+      menu.setAttribute('aria-expanded', String(open));
     });
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && !hint?.open && (ownsFullscreen || ownsOrientation)) exitLandscape();
+    nav.addEventListener('click', event => { if (event.target.closest('a')) closeMenu(); });
+    document.addEventListener('click', event => { if (!header.contains(event.target)) closeMenu(); });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && document.body.classList.contains('home-menu-open')) closeMenu(true);
     });
-    window.addEventListener('pagehide', () => {
-      pageActive = false;
-      requestId++;
-      requestPending = false;
-      hintState = 'initial';
-      releaseLandscape();
-      closeHint();
-    });
-    window.addEventListener('pageshow', () => { pageActive = true; scheduleLayout(); });
-    updateLayout();
-    homePortraitQuery.addEventListener('change', scheduleLayout);
-    homeLandscapeQuery.addEventListener('change', scheduleLayout);
-    reducedMotionQuery.addEventListener('change', scheduleLayout);
-    window.addEventListener('resize', scheduleLayout, { passive: true });
-    if (document.fonts) document.fonts.ready.then(scheduleLayout);
   }
 
   // 1. STATE & CART MANAGEMENT
@@ -1172,6 +927,8 @@
       if (result && result.catch) result.catch(() => { if (!switching) updateButtons(); });
     }
     function updateVideoSource() {
+      // A covered portrait view keeps the existing landscape media and playback state.
+      if (window.OogaHomeEntry && isHomePhone() && !window.OogaHomeEntry.isLandscape()) return;
       const phone = isHomePhone();
       const source = phone ? (isHomeLandscape() ? landscapeSource : portraitSource || landscapeSource)
         : (window.innerWidth < 768 && portraitSource ? portraitSource : landscapeSource);
@@ -1538,7 +1295,7 @@
   }
 
   // DOM READY INITIALIZATION
-  document.addEventListener('DOMContentLoaded', function () {
+  function startTheme() {
     initHomepagePhoneLayout();
     initParallax();
     initSection3Parallax();
@@ -1549,6 +1306,9 @@
     initVideoCinema();
     initCartAndVariants();
     initNotifyModal();
-  });
+  }
+  if (window.OogaHomeEntry && document.body.classList.contains('template-index')) window.OogaHomeEntry.register(startTheme);
+  else if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startTheme, { once: true });
+  else startTheme();
 
 })();
