@@ -562,10 +562,10 @@
       camera.zoom = (expanded ? 1.12 : 1) * baseHeight / renderHeight;
       const desktopHomepage = isHomepageBook && !isHomePhone() && window.innerWidth > 900;
       if (desktopHomepage) {
-        camera.zoom *= 0.88;
+        camera.zoom *= 0.92;
         if (desktopRotationRadius) {
           const headerHeight = document.getElementById('SiteHeader')?.getBoundingClientRect().height || 0;
-          const availableHeight = Math.max(1, Math.min(window.innerHeight - headerHeight - 48, renderHeight - 48));
+          const availableHeight = Math.max(1, Math.min(window.innerHeight - headerHeight - 16, renderHeight - 16));
           camera.zoom = Math.min(camera.zoom, availableHeight / (renderHeight * desktopRotationRadius));
         }
       }
