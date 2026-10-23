@@ -501,6 +501,53 @@
     renderer.toneMappingExposure = 0.98; // Natural, accurate exposure (eliminates oversaturation/blowout)
     container.appendChild(renderer.domElement);
 
+    let desktopRotationRadius = null;
+
+    function measureDesktopRotationRadius() {
+      // In pivot space, unrestricted yaw takes each corner's Z through [-radius, radius].
+      // Its perspective Y is monotonic in Z, so only those two ends need testing.
+      pivotGroup.updateMatrixWorld(true);
+      const inversePivot = new THREE.Matrix4().copy(pivotGroup.matrixWorld).invert();
+      const projection = 1 / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+      const distance = camera.position.z;
+      let radius = 0;
+      pivotGroup.traverse(mesh => {
+        if (!mesh.isMesh) return;
+        mesh.geometry.computeBoundingBox();
+        const box = mesh.geometry.boundingBox;
+        const local = new THREE.Matrix4().multiplyMatrices(inversePivot, mesh.matrixWorld);
+        for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
+          const corner = new THREE.Vector3(x, y, z).applyMatrix4(local);
+          const yawRadius = Math.hypot(corner.x, corner.z);
+          for (const depth of [-yawRadius, yawRadius]) for (const bob of [-0.025, 0.025]) {
+            const vertical = corner.y;
+            const angles = [-0.5, 0.5];
+            // Find the interior extrema as well as the existing drag-tilt limits.
+            // The derivative is A*sin(tilt) + B*cos(tilt) + C.
+            const a = -distance * vertical - bob * depth;
+            const b = -distance * depth + bob * vertical;
+            const c = vertical * vertical + depth * depth;
+            const magnitude = Math.hypot(a, b);
+            if (magnitude && c <= magnitude) {
+              const phase = Math.atan2(a, b);
+              const offset = Math.acos(-c / magnitude);
+              for (const sign of [-1, 1]) for (const turn of [-1, 0, 1]) {
+                const angle = phase + sign * offset + turn * Math.PI * 2;
+                if (angle >= -0.5 && angle <= 0.5) angles.push(angle);
+              }
+            }
+            for (const angle of angles) {
+              const sin = Math.sin(angle), cos = Math.cos(angle);
+              const projected = (vertical * cos - depth * sin + bob) / (distance - vertical * sin - depth * cos);
+              radius = Math.max(radius, Math.abs(projected) * projection);
+            }
+          }
+        }
+      });
+      // Keep a small rounding allowance at the calculated corner envelope.
+      return radius > 0 ? radius * 1.002 : null;
+    }
+
     function resizeBookViewer(baseWidth, baseHeight) {
       if (!baseWidth || !baseHeight) return;
 
@@ -513,6 +560,15 @@
       camera.aspect = renderWidth / renderHeight;
       // Preserve the original pixels per world unit inside the larger canvas.
       camera.zoom = (expanded ? 1.12 : 1) * baseHeight / renderHeight;
+      const desktopHomepage = isHomepageBook && !isHomePhone() && window.innerWidth > 900;
+      if (desktopHomepage) {
+        camera.zoom *= 0.88;
+        if (desktopRotationRadius) {
+          const headerHeight = document.getElementById('SiteHeader')?.getBoundingClientRect().height || 0;
+          const availableHeight = Math.max(1, Math.min(window.innerHeight - headerHeight - 48, renderHeight - 48));
+          camera.zoom = Math.min(camera.zoom, availableHeight / (renderHeight * desktopRotationRadius));
+        }
+      }
       camera.updateProjectionMatrix();
       renderer.setSize(renderWidth, renderHeight);
 
@@ -600,6 +656,11 @@
         uprightGroup.rotation.x = Math.PI / 2;
 
         pivotGroup.add(uprightGroup);
+
+        if (isHomepageBook) {
+          desktopRotationRadius = measureDesktopRotationRadius();
+          resizeBookViewer(container.clientWidth, container.clientHeight);
+        }
 
         // Initial Hero Pose: Standing upright, front cover facing user at slight dynamic 3D angle
         pivotGroup.rotation.set(THREE.MathUtils.degToRad(8), THREE.MathUtils.degToRad(-25), 0);
@@ -851,7 +912,13 @@
         });
       }
       on(window, 'homepage:layout', scheduleViewerResize);
-      if (typeof ResizeObserver !== 'undefined') new ResizeObserver(scheduleViewerResize).observe(container);
+      if (document.fonts) document.fonts.ready.then(scheduleViewerResize);
+      if (typeof ResizeObserver !== 'undefined') {
+        const observer = new ResizeObserver(scheduleViewerResize);
+        observer.observe(container);
+        const header = document.getElementById('SiteHeader');
+        if (header) observer.observe(header);
+      }
     }
   }
 
